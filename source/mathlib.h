@@ -88,7 +88,7 @@ void _VectorSubtract (vec3_t veca, vec3_t vecb, vec3_t out);
 void _VectorAdd (vec3_t veca, vec3_t vecb, vec3_t out);
 void _VectorCopy (vec3_t in, vec3_t out);
 
-int VectorCompare (vec3_t v1, vec3_t v2);
+#define VectorCompare(v1,v2)  ((v1)[0]==(v2)[0] && (v1)[1]==(v2)[1] && (v1)[2]==(v2)[2])
 vec_t VectorLength (vec3_t v);
 float VecLength2(vec3_t v1, vec3_t v2);
 void LerpVector (const vec3_t from, const vec3_t to, float frac, vec3_t out);

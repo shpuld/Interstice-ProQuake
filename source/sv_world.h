@@ -76,7 +76,7 @@ int SV_PointContents (vec3_t p);
 // does not check any entities at all
 // the non-true version remaps the water current contents to content_water
 
-qboolean SV_RecursiveHullCheck (hull_t *hull, int num, float p1f, float p2f, vec3_t p1, vec3_t p2, trace_t *trace);
+qboolean SV_RecursiveHullCheck (hull_t *hull, int num, vec3_t p1, vec3_t p2, trace_t *trace);
 byte *SV_FatPVS (vec3_t org, model_t *worldmodel);
 edict_t	*SV_TestEntityPosition (edict_t *ent);
 

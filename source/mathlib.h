@@ -32,6 +32,8 @@ typedef	int	fixed16_t;
 
 float rsqrt( float number );
 
+extern float _mathlib_temp_float1;
+
 #ifndef M_PI
 #if defined(GU_PI)
 #define M_PI = GU_PI	// matches value in gcc v2 math.h
@@ -149,6 +151,17 @@ int GreatestCommonDivisor (int i1, int i2);
 
 void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);
 int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct mplane_s *plane);
+
+#define DoublePrecisionDotProduct(x,y) ((double)(x)[0]*(y)[0]+(double)(x)[1]*(y)[1]+(double)(x)[2]*(y)[2])
+
+#define VectorInterpolate(v1, _frac, v2, v)		\
+do {											\
+	_mathlib_temp_float1 = _frac;				\
+												\
+	(v)[0] = (v1)[0] + _mathlib_temp_float1 * ((v2)[0] - (v1)[0]);\
+	(v)[1] = (v1)[1] + _mathlib_temp_float1 * ((v2)[1] - (v1)[1]);\
+	(v)[2] = (v1)[2] + _mathlib_temp_float1 * ((v2)[2] - (v1)[2]);\
+} while(0)
 
 #ifdef SUPPORTS_AUTOID_SOFTWARE
 float *Matrix4_NewRotation(float a, float x, float y, float z);

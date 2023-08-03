@@ -60,7 +60,7 @@ void TraceLine (vec3_t start, vec3_t end, vec3_t impact)
 	trace_t	trace;
 
 	memset (&trace, 0, sizeof(trace));
-	SV_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, start, end, &trace);
+	SV_RecursiveHullCheck (cl.worldmodel->hulls, 0, start, end, &trace);
 
 	VectorCopy (trace.endpos, impact);
 }
@@ -100,7 +100,7 @@ void Chase_Update (void)
 		dist = 1;	// should never happen
 	}
 
-	r_refdef.viewangles[PITCH] = -180 / M_PI * atan2f( stop[2], dist );
+	r_refdef.viewangles[PITCH] = -180 / M_PI * vfpu_atan2f( stop[2], dist );
 	r_refdef.viewangles[YAW] -= chase_yaw.value;
 
     TraceLine(r_refdef.vieworg, chase_dest, stop);

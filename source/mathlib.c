@@ -27,6 +27,10 @@ void Sys_Error (char *error, ...);
 vec3_t vec3_origin = {0,0,0};
 int nanmask = 255<<23;
 
+int  _mathlib_temp_int1, _mathlib_temp_int2, _mathlib_temp_int3;
+float _mathlib_temp_float1, _mathlib_temp_float2, _mathlib_temp_float3;
+vec3_t _mathlib_temp_vec1, _mathlib_temp_vec2, _mathlib_temp_vec3;
+
 /*-----------------------------------------------------------------*/
 
 float rsqrt( float number )

@@ -190,59 +190,168 @@ int Sys_GetPSPModel(void)
 	return PSP_MODEL_SLIM;
 }
 
+typedef struct {
+	char* pretty_name;
+	char* dir;
+	int heap_phat;
+	int heap_slim;
+	int status_phat;
+	int status_slim;
+	bool has_pretty_name;
+	bool occupied;
+} uimod_t;
+
+#define GAME_STATUS_UNKNOWN 	0
+#define GAME_STATUS_PERFECT 	1
+#define GAME_STATUS_DECENT 		2
+#define GAME_STATUS_BAD 		3
+
+uimod_t games_found[25];
+
+void register_game(const char* dirname, int index)
+{
+	games_found[index].has_pretty_name = false;
+	games_found[index].heap_phat = games_found[index].heap_slim = (int)heapSize;
+	games_found[index].occupied = true;
+	games_found[index].dir = static_cast<char*>(malloc(sizeof(char)*32));
+	sprintf(games_found[index].dir, "%s", dirname);
+	games_found[index].status_phat = games_found[index].status_slim = GAME_STATUS_UNKNOWN;
+
+	// Quake
+	if (strcasecmp(dirname, "id1") == 0) {
+		games_found[index].has_pretty_name = true;
+		games_found[index].pretty_name = static_cast<char*>(malloc(sizeof(char)*8));
+		sprintf(games_found[index].pretty_name, "Quake", dirname);
+		games_found[index].heap_phat = 13 * 1024 * 1024;
+		games_found[index].heap_slim = 20 * 1024 * 1024;
+		games_found[index].status_phat = games_found[index].status_slim = GAME_STATUS_PERFECT;
+	} 
+	// Quake Mission Pack 1: Scourge of Armagon
+	else if (strcasecmp(dirname, "hipnotic") == 0) {
+		games_found[index].has_pretty_name = true;
+		games_found[index].pretty_name = static_cast<char*>(malloc(sizeof(char)*64));
+		sprintf(games_found[index].pretty_name, "Quake Mission Pack 1: Scourge of Armagon", dirname);
+		games_found[index].heap_phat = 13 * 1024 * 1024;
+		games_found[index].heap_slim = 28 * 1024 * 1024;
+		games_found[index].status_phat = games_found[index].status_slim = GAME_STATUS_PERFECT;
+	}
+	// Quake Mission Pack 2: Dissolution of Eternity
+	else if (strcasecmp(dirname, "rogue") == 0) {
+		games_found[index].has_pretty_name = true;
+		games_found[index].pretty_name = static_cast<char*>(malloc(sizeof(char)*64));
+		sprintf(games_found[index].pretty_name, "Quake Mission Pack 2: Dissolution of Eternity", dirname);
+		games_found[index].heap_phat = 12 * 1024 * 1024;
+		games_found[index].heap_slim = 28 * 1024 * 1024;
+		games_found[index].status_phat = GAME_STATUS_DECENT;
+		games_found[index].status_slim = GAME_STATUS_PERFECT;
+	}
+	// In The Shadows
+	else if (strcasecmp(dirname, "shadows") == 0) {
+		games_found[index].has_pretty_name = true;
+		games_found[index].pretty_name = static_cast<char*>(malloc(sizeof(char)*16));
+		sprintf(games_found[index].pretty_name, "In The Shadows", dirname);
+		games_found[index].heap_phat = 13 * 1024 * 1024;
+		games_found[index].heap_slim = 32 * 1024 * 1024;
+		games_found[index].status_phat = GAME_STATUS_BAD;
+		games_found[index].status_slim = GAME_STATUS_BAD;
+	}
+	// UltraQuake
+	else if (strcasecmp(dirname, "ultraquake") == 0) {
+		games_found[index].has_pretty_name = true;
+		games_found[index].pretty_name = static_cast<char*>(malloc(sizeof(char)*16));
+		sprintf(games_found[index].pretty_name, "UltraQuake", dirname);
+		games_found[index].heap_phat = 13 * 1024 * 1024;
+		games_found[index].heap_slim = 32 * 1024 * 1024;
+		games_found[index].status_phat = GAME_STATUS_BAD;
+		games_found[index].status_slim = GAME_STATUS_BAD;
+	}
+	// I WANT TOAST
+	else if (strcasecmp(dirname, "toast") == 0) {
+		games_found[index].has_pretty_name = true;
+		games_found[index].pretty_name = static_cast<char*>(malloc(sizeof(char)*16));
+		sprintf(games_found[index].pretty_name, "I WANT TOAST", dirname);
+		games_found[index].heap_phat = 13 * 1024 * 1024;
+		games_found[index].heap_slim = 20 * 1024 * 1024;
+		games_found[index].status_phat = games_found[index].status_slim = GAME_STATUS_PERFECT;
+	}
+	// Abandon
+	else if (strcasecmp(dirname, "abandon") == 0) {
+		games_found[index].has_pretty_name = true;
+		games_found[index].pretty_name = static_cast<char*>(malloc(sizeof(char)*16));
+		sprintf(games_found[index].pretty_name, "Abandon", dirname);
+		games_found[index].heap_phat = 13 * 1024 * 1024;
+		games_found[index].heap_slim = 20 * 1024 * 1024;
+		games_found[index].status_phat = games_found[index].status_slim = GAME_STATUS_PERFECT;
+	}
+	// Dimension of the Past
+	else if (strcasecmp(dirname, "dopa") == 0) {
+		games_found[index].has_pretty_name = true;
+		games_found[index].pretty_name = static_cast<char*>(malloc(sizeof(char)*32));
+		sprintf(games_found[index].pretty_name, "Dimension of the Past", dirname);
+		games_found[index].heap_phat = 13 * 1024 * 1024;
+		games_found[index].heap_slim = 24 * 1024 * 1024;
+		games_found[index].status_phat = games_found[index].status_slim = GAME_STATUS_PERFECT;
+	}
+	// LibreQuake
+	else if (strcasecmp(dirname, "lq1") == 0) {
+		games_found[index].has_pretty_name = true;
+		games_found[index].pretty_name = static_cast<char*>(malloc(sizeof(char)*32));
+		sprintf(games_found[index].pretty_name, "LibreQuake", dirname);
+		games_found[index].heap_phat = 13 * 1024 * 1024;
+		games_found[index].heap_slim = 32 * 1024 * 1024;
+		games_found[index].status_phat = GAME_STATUS_BAD;
+		games_found[index].status_slim = GAME_STATUS_DECENT;
+	}
+}
+
+int Random_Int (int max_int)
+{
+	float	f;
+	f = (rand ()&0x7fff) / ((float)0x7fff) * max_int;
+	if (f > 0)
+		return (int)(f + 0.5) + 1;
+	else
+		return (int)(f - 0.5) + 1;
+}
+
+char* GenerateSplashText(void)
+{
+	int num = Random_Int(4);
+
+	switch(num) {
+		case 1: return "DO NOT PET THE SHAMBLER"; break;
+		case 2: return "SHUB-NIGGURATH USES THE HARD R"; break;
+		case 3: return "NOW WITCH CHUNKIER PIXELS"; break;
+		case 4: return "erm...."; break;
+		default: return "GPLv2 since '99"; break;
+	}
+}
+
+#define TEXT_WHITE 	0xffffff
+#define TEXT_RED   	0x0000ff
+#define TEXT_GREEN 	0x00ff00
+#define TEXT_BLUE  	0xff0000
+#define TEXT_PURPLE	0xff00ff
+#define TEXT_YELLOW 0xffff00
+
 void StartUpParams(char **args, int argc, char *cmdlinePath, char *currentDirectory, char *gameDirectory) 
 {
-
-	if (CheckParm(args, f_argc,"-prompt")) {
+	// a REALLY quick and dirty interface thrown together to be
+	// more user-accessible and list mod compatibility.
+	if (CheckParm(args, f_argc,"-interface")) {
 		SceCtrlData pad;
 		pspDebugScreenInit();
 	
 		sceCtrlSetSamplingCycle(0);
 		sceCtrlSetSamplingMode(PSP_CTRL_MODE_ANALOG);
-		
-		bool done = false;
-		
-		int menu_min[7] = {0,0,0,0,0,0,0};
-		int menu_max[7] = {0,1,(MAX_HEAP_MB - MIN_HEAP_MB)-1,1,1,1,1};
-		int menu_cur[7] = {0,0,0,0,0,0,0};
-		
-		int menu_item_min = 0;
-		int menu_item_max = 6;
-		int menu_item_cur = 0;
-					
-		char temp_str[16];
-			
-		char *cpus[2];
-		cpus[0] = strdup("222");
-		cpus[1] = strdup("333");
-		
-		char *vfilter[2];
-		vfilter[0] = strdup("OFF");
-		vfilter[1] = strdup("ON");
-		
-		char *hipnotic[2];
-		hipnotic[0] = strdup("OFF");
-		hipnotic[1] = strdup("ON");
-		
-		char *rogue[2];
-		rogue[0] = strdup("OFF");
-		rogue[1] = strdup("ON");
-		
-		char *modmusic[2];
-		modmusic[0] = strdup("OFF");
-		modmusic[1] = strdup("ON");
-		
-		char *heaps[MAX_HEAP_MB - MIN_HEAP_MB];
-		for (int i = 0 ;i < MAX_HEAP_MB - MIN_HEAP_MB; i++) {
-			sprintf(temp_str, "%d", MIN_HEAP_MB+i);
-			heaps[i] = strdup(temp_str);
+
+		for(int i = 0; i < 25; i++) {
+			games_found[i].occupied = false;
 		}
-		
-		//++ dirs setup
-		char *dirs[64];
-		dirs[0] = strdup("");
+
+		// Grab all of the mods we have
 		int dir_fd = sceIoDopen(gameDirectory);
-		int j = 1;
+		int dir_index = 0;
 		
  		if (dir_fd >= 0) {
  			SceIoDirent* p_dir_de = new SceIoDirent; 
@@ -252,308 +361,144 @@ void StartUpParams(char **args, int argc, char *cmdlinePath, char *currentDirect
  				res = sceIoDread(dir_fd, p_dir_de);
  				if ((res > 0) && (p_dir_de->d_stat.st_attr & FIO_SO_IFDIR)) {
  					if (!(strcasecmp(p_dir_de->d_name, ".") == 0 || strcasecmp(p_dir_de->d_name, "..") == 0 ||
- 					      strcasecmp(p_dir_de->d_name, "mp3") == 0 || strcasecmp(p_dir_de->d_name, "id1") == 0)) {
- 						dirs[j++] = strdup( p_dir_de->d_name);
+ 					      strcasecmp(p_dir_de->d_name, "mp3") == 0 || strcasecmp(p_dir_de->d_name, "hooks") == 0)) {
+						register_game(p_dir_de->d_name, dir_index);
+						dir_index++;
  					}
  				}
  			} while (res > 0);
  			delete p_dir_de;
  		}
 		sceIoDclose(dir_fd);
-		//-- dirs setup
-		
-		menu_max[0] = j-1;
-		
-		if (CheckParm(args, f_argc, "-cpu333"))
-			menu_cur[1] = 1;
-			
-		if (CheckParm(args, f_argc, "-linear"))
-			menu_cur[3] = 1;
-			
-		if (CheckParm(args, f_argc, "-hipnotic"))
-			menu_cur[4] = 1;
-			
-		if (CheckParm(args, f_argc, "-setmodmusic"))
-			menu_cur[6] = 1;
-		
-		if (CheckParm(args, f_argc, "-heap")) {
-			int idx = CheckParm(args, f_argc, "-heap");
-			
-			if (idx+1 < f_argc) {
-				for (int i = 0 ;i < MAX_HEAP_MB - MIN_HEAP_MB; i++) {
-					if (strcasecmp(heaps[i], args[idx+1]) == 0) {
-						menu_cur[2] = i;
-					}
 
-					if (args[idx+1][0] == '-') {
-						args[idx][0] = '\0';
-					}	
-				}
-			}			
-		} else {
-			for (int i = 0 ;i < MAX_HEAP_MB - MIN_HEAP_MB; i++) {
-				sprintf(temp_str, "%d", heapSize/(1024*1024));
-				if (strcasecmp(heaps[i],temp_str) == 0) {
-					menu_cur[2] = i;
-				}
-			}			
-		}
+		char* splash = GenerateSplashText();
 		
-		if (CheckParm(args, f_argc, "-game")) {
-			int idx = CheckParm(args, f_argc, "-game");
-			
-			if (idx+1 < f_argc) {
-				for (int i = 0 ;i < j; i++) {
-					if (strcasecmp(args[idx+1],dirs[i]) == 0) {
-						menu_cur[0] = i;
-					}
-	
-					if (args[idx+1][0] == '-') {
-						args[idx][0] = '\0';
-					}	
-				}
-			}			
-		}
-		
+		bool done = false;
+		int cursor_index = 0;
+
 		while(!done) {
 			sceDisplayWaitVblankStart();
-    		sceDisplayWaitVblankStart();
-    		sceDisplayWaitVblankStart();
 			sceDisplayWaitVblankStart();
-    		sceDisplayWaitVblankStart();
-    		sceDisplayWaitVblankStart();
+			sceDisplayWaitVblankStart();
+			sceDisplayWaitVblankStart();
+			sceDisplayWaitVblankStart();
     		
-			pspDebugScreenSetXY(0, 2);
+			pspDebugScreenSetXY(0, 1);
 			sceCtrlReadBufferPositive(&pad, 1); 
 			
-			pspDebugScreenSetTextColor(0xffffff);
-			
-			printf("Insomnia ProQuake 4.71 Revision 4\n");
-			printf("---------------- \n");
-			printf("Command line file : %s \n", cmdlinePath);
-			printf("Startup directory : %s \n", currentDirectory);
-			printf("Game directory    : %s \n", gameDirectory);
-			printf("\n");
-			printf("Press [X]Cross to Continue [O]Circle to Quit\n");
-			printf("\n");
-			
-			pspDebugScreenSetTextColor(0x00ffff);
-			
-			if (menu_cur[4] == 1)
-				menu_cur[5] = 0;
-			if (menu_cur[5] == 1)
-				menu_cur[4] = 0;
-			
-			if (j > -1) {
-				if (menu_item_cur == 0) 
-					pspDebugScreenSetTextColor(0x00ff00);
-				printf("Mod directory     : [%d/%d] '%s' \t \n", 1+menu_cur[0], 1+menu_max[0], dirs[menu_cur[0]]);
-				pspDebugScreenSetTextColor(0x00ffff);
-			}
-			if (menu_item_cur == 1) 
-				pspDebugScreenSetTextColor(0x00ff00);
-			printf("CPU Speed         : [%d/%d] '%s' \t \n", 1+menu_cur[1], 1+menu_max[1], cpus[menu_cur[1]]);
-			pspDebugScreenSetTextColor(0x00ffff);
+			pspDebugScreenSetTextColor(TEXT_WHITE);
+			printf(" %s %s : \"%s\"\n", ENGINE_NAME, ENGINE_VERSION, splash);
+			pspDebugScreenSetTextColor(TEXT_RED);
+			printf("====================================================================\n");
+			pspDebugScreenSetTextColor(TEXT_BLUE);
+			printf("   Playing an unidentified mod will use heap from quake.cmdline   \n\n");
+			pspDebugScreenSetTextColor(TEXT_WHITE);
 
-			if (menu_item_cur == 2) 
-				pspDebugScreenSetTextColor(0x00ff00);
-			printf("Heap Size         : [%d/%d] '%s' \t \n", 1+menu_cur[2], 1+menu_max[2], heaps[menu_cur[2]]);
-			pspDebugScreenSetTextColor(0x00ffff);
-			
-			if (menu_item_cur == 3) 
-				pspDebugScreenSetTextColor(0x00ff00);
-			printf("Texture Filtering : [%d/%d] '%s' \t \n", 1+menu_cur[3], 1+menu_max[3], vfilter[menu_cur[3]]);
-			pspDebugScreenSetTextColor(0x00ffff);
-			
-			if (menu_item_cur == 4) 
-				pspDebugScreenSetTextColor(0x00ff00);
-			printf("Hipnotic Mode     : [%d/%d] '%s' \t \n", 1+menu_cur[4], 1+menu_max[4], hipnotic[menu_cur[4]]);
-			pspDebugScreenSetTextColor(0x00ffff);
-			
-			if (menu_item_cur == 5) 
-				pspDebugScreenSetTextColor(0x00ff00);
-			printf("Rogue Mode        : [%d/%d] '%s' \t \n", 1+menu_cur[5], 1+menu_max[5], modmusic[menu_cur[5]]);
-			pspDebugScreenSetTextColor(0x00ffff);
-			
-			if (menu_item_cur == 6) 
-				pspDebugScreenSetTextColor(0x00ff00);
-			printf("Mod Music         : [%d/%d] '%s' \t \n", 1+menu_cur[6], 1+menu_max[6], modmusic[menu_cur[6]]);
-			pspDebugScreenSetTextColor(0xffffff);
+			// 25 entries max..
+			for(int i = 0; i < dir_index; i++) {
+				if (games_found[i].has_pretty_name == true) {
+					if (i == cursor_index)
+						printf(" * %s ", games_found[i].pretty_name);
+					else
+						printf("  %s ", games_found[i].pretty_name);
+				} else {
+					if (i == cursor_index)
+						printf(" * %s ", games_found[i].dir);
+					else
+						printf("  %s ", games_found[i].dir);
+				}
+
+				if (psp_system_model == PSP_MODEL_PHAT) {
+					switch(games_found[i].status_phat) {
+						case GAME_STATUS_UNKNOWN:
+							pspDebugScreenSetTextColor(TEXT_PURPLE);
+							printf("(UNKNOWN)\n");
+							break;
+						case GAME_STATUS_BAD:
+							pspDebugScreenSetTextColor(TEXT_RED);
+							printf("(NOT PLAYABLE)\n");
+							break;
+						case GAME_STATUS_DECENT:
+							pspDebugScreenSetTextColor(TEXT_YELLOW);
+							printf("(DECENT)\n");
+							break;
+						case GAME_STATUS_PERFECT:
+							pspDebugScreenSetTextColor(TEXT_GREEN);
+							printf("(GOOD)\n");
+							break;
+						default: break;
+					}
+					pspDebugScreenSetTextColor(TEXT_WHITE);
+				} else {
+					switch(games_found[i].status_slim) {
+						case GAME_STATUS_UNKNOWN:
+							pspDebugScreenSetTextColor(TEXT_PURPLE);
+							printf("(UNKNOWN)\n");
+							break;
+						case GAME_STATUS_BAD:
+							pspDebugScreenSetTextColor(TEXT_RED);
+							printf("(NOT PLAYABLE)\n");
+							break;
+						case GAME_STATUS_DECENT:
+							pspDebugScreenSetTextColor(TEXT_YELLOW);
+							printf("(DECENT)\n");
+							break;
+						case GAME_STATUS_PERFECT:
+							pspDebugScreenSetTextColor(TEXT_GREEN);
+							printf("(GOOD)\n");
+							break;
+						default: break;
+					}
+					pspDebugScreenSetTextColor(TEXT_WHITE);
+				}
+			}
+
+			pspDebugScreenSetXY(0, 32);
+			pspDebugScreenSetTextColor(TEXT_BLUE);
+			printf(" X: Select Title | HOME: Quit to XMB\n");
 			
 			if (pad.Buttons != 0) {
-				if (pad.Buttons & PSP_CTRL_CIRCLE){
-					Sys_Quit();
-				}
-				if (pad.Buttons & PSP_CTRL_HOME){
-					sceKernelExitGame();
-				} 				
-				if (pad.Buttons & PSP_CTRL_CROSS){
+				// Start game
+				if (pad.Buttons & PSP_CTRL_CROSS) {
 					done = true;
-				} 	
+
+					// Set Heap sizes
+					if (psp_system_model == PSP_MODEL_PHAT) {
+						heapSize = (size_t)games_found[cursor_index].heap_phat;
+					} else {
+						heapSize = (size_t)games_found[cursor_index].heap_slim;
+					}
+
+					// Don't do -game parm stuff if its id1 (fixes booting shareware)
+					if (strcasecmp(games_found[cursor_index].dir, "id1") != 0) {
+						// Set the game param to the mod of choice
+						int len1 = strlen("-game");
+						int len2 = strlen(games_found[cursor_index].dir);
+						args[f_argc] = new char[len1+1];
+						args[f_argc+1] = new char[len2+1];
+							
+						strcpy(args[f_argc], "-game");
+						strcpy(args[f_argc+1], games_found[cursor_index].dir);	
+				
+						f_argc += 2;
+					}
+				}
 				if (pad.Buttons & PSP_CTRL_UP){
-					menu_item_cur--;
-					menu_item_cur = (menu_item_cur < menu_item_min ? menu_item_min : menu_item_cur);					
+					cursor_index--;
+					if (cursor_index < 0)
+						cursor_index = dir_index - 1;				
 				} 
 				if (pad.Buttons & PSP_CTRL_DOWN){
-					menu_item_cur++;
-					menu_item_cur = (menu_item_cur > menu_item_max ? menu_item_max : menu_item_cur);
+					cursor_index++;
+					if (cursor_index > dir_index - 1)
+						cursor_index = 0;		
 				} 
-				if (pad.Buttons & PSP_CTRL_LEFT){
-					menu_cur[menu_item_cur]--;
-					menu_cur[menu_item_cur] = (menu_cur[menu_item_cur] < menu_min[menu_item_cur] ? menu_min[menu_item_cur] : menu_cur[menu_item_cur]);
-				} 
-				if (pad.Buttons & PSP_CTRL_RIGHT){
-					menu_cur[menu_item_cur]++;
-					menu_cur[menu_item_cur] = (menu_cur[menu_item_cur] > menu_max[menu_item_cur] ? menu_max[menu_item_cur] : menu_cur[menu_item_cur]);
-				}      
-			}
-			
-		}
-		if (CheckParm(args, f_argc, "-game")) {
-			int idx = CheckParm(args, f_argc, "-game");
-			if (strcasecmp(args[idx+1],dirs[menu_cur[0]]) != 0) {
-
-				if (strlen(dirs[menu_cur[0]]) > 0) {
-					int len2 = strlen(dirs[menu_cur[0]]);
-					args[idx+1] = new char[len2+1];
-					strcpy(args[idx+1], dirs[menu_cur[0]]);	
-				} else {
-					strcpy(args[idx], "");	
-					strcpy(args[idx+1], "");	
+				if (pad.Buttons & PSP_CTRL_HOME) {
+					Sys_Quit();
 				}
 			}
-		}
-		else {
-			if (strlen(dirs[menu_cur[0]]) > 0) {
-				int len1 = strlen("-game");
-				int len2 = strlen(dirs[menu_cur[0]]);
-				
-				args[f_argc] = new char[len1+1];
-				args[f_argc+1] = new char[len2+1];
-				
-				strcpy(args[f_argc], "-game");
-				strcpy(args[f_argc+1], dirs[menu_cur[0]]);	
-	
-				f_argc += 2;
-			}
-		}
-
-		if (strcasecmp(cpus[menu_cur[1]],"333") == 0) {
-		
-			if (!CheckParm(args, f_argc, "-cpu333")) {
-				int len1 = strlen("-cpu333");
-				
-				args[f_argc] = new char[len1+1];
-				strcpy(args[f_argc], "-cpu333");
-				
-				f_argc += 1;
-			}
-		} else {
-			if (CheckParm(args, f_argc, "-cpu333")) {
-				int idx = CheckParm(args, f_argc, "-cpu333");
-				strcpy(args[idx], "-cpu222");
-			}
-		}
-				
-		if (CheckParm(args, f_argc, "-heap")) {
 			
-			int idx = CheckParm(args, f_argc, "-heap");
-			
-			int len2 = strlen(heaps[menu_cur[2]]);
-			
-			args[idx+1] = new char[len2+1];
-			strcpy(args[idx+1], heaps[menu_cur[2]]);	
 		}	
-		else {
-			int len1 = strlen("-heap");
-			int len2 = strlen(heaps[menu_cur[2]]);
-			
-			args[f_argc] = new char[len1+1];
-			args[f_argc+1] = new char[len2+1];
-			
-			strcpy(args[f_argc], "-heap");
-			strcpy(args[f_argc+1], heaps[menu_cur[2]]);	
-
-			f_argc += 2;
-		}
-		
-		
-		if (strcasecmp(vfilter[menu_cur[3]],"ON") == 0) {
-			if (!CheckParm(args, f_argc, "-linear")) {
-				int len1 = strlen("-linear");
-				
-				args[f_argc] = new char[len1+1];
-				strcpy(args[f_argc], "-linear");
-				
-				f_argc += 1;
-			}
-		}
-		if (strcasecmp(vfilter[menu_cur[3]],"OFF") == 0){
-				int len1 = strlen("-nearest");
-				
-				args[f_argc] = new char[len1+1];
-				strcpy(args[f_argc], "-nearest");
-				
-				f_argc += 1;
-				}
-			
-		
-		if (strcasecmp(hipnotic[menu_cur[4]],"ON") == 0) {
-		
-			if (!CheckParm(args, f_argc, "-hinotic")) {
-				int len1 = strlen("-hipnotic");
-				
-				args[f_argc] = new char[len1+1];
-				strcpy(args[f_argc], "-hipnotic");
-				
-				f_argc += 1;
-			}
-		}
-		
-		if (strcasecmp(hipnotic[menu_cur[5]],"ON") == 0) {
-		
-			if (!CheckParm(args, f_argc, "-rogue")) {
-				int len1 = strlen("-rogue");
-				
-				args[f_argc] = new char[len1+1];
-				strcpy(args[f_argc], "-rogue");
-				
-				f_argc += 1;
-			}
-		}
-		
-		
-		if (strcasecmp(modmusic[menu_cur[6]],"ON") == 0) {
-		
-			if (!CheckParm(args, f_argc, "-modmusic")) {
-				int len1 = strlen("-modmusic");
-				
-				args[f_argc] = new char[len1+1];
-				strcpy(args[f_argc], "-modmusic");
-				
-				f_argc += 1;
-			}
-		}
-		
-			
-		// get rid of temp. alloc memory
-		for (int i = 0 ;i < MAX_HEAP_MB - MIN_HEAP_MB; i++) {
-			free(heaps[i]);
-		}	
-		for (int i = 0 ;i < j; i++) {
-			free(dirs[i]);
-		}
-		free(cpus[0]);
-		free(cpus[1]);
-		free(vfilter[0]);
-		free(vfilter[1]);
-		free(hipnotic[0]);
-		free(hipnotic[1]);
-		free(modmusic[0]);
-		free(modmusic[1]);
-		free(rogue[0]);
-		free(rogue[1]);
-		pspDebugScreenClear(); 
 	}
 }
 
@@ -613,6 +558,7 @@ int user_main(SceSize argc, void* argp)
 	// cause problems with firmware 2.0+
 	//setUpCallbackThread(); //<-- dark_duke removal 7/6/2016
 
+	srand(time(NULL));
 	psp_system_model = Sys_GetPSPModel();
 
 	// Disable floating point exceptions.
@@ -656,11 +602,6 @@ int user_main(SceSize argc, void* argp)
 	/////
 	StartUpParams(args, f_argc, path_f, currentDirectory, gameDirectory);
 	setUpCallbackThread();
-
-	if (psp_system_model == PSP_MODEL_PHAT)
-		heapSize = 13 * 1024 * 1024;
-	else
-		heapSize = 32 * 1024 * 1024;
 	
 	if (CheckParm(args, f_argc, "-linear")) {
 		char* tempStr = args[CheckParm(args, f_argc,"-linear")+1];
@@ -694,6 +635,13 @@ int user_main(SceSize argc, void* argp)
 			
 		heapSize = heapSizeMB * 1024 * 1024;
 	}
+
+	if (heapSize == 0) {
+		if (psp_system_model == PSP_MODEL_PHAT)
+			heapSize = 13 * 1024 * 1024;
+		else
+			heapSize = 32 * 1024 * 1024;
+	}
 	
 	// Allocate the heap.
 	std::vector<unsigned char>	heap(heapSize, 0);
@@ -717,21 +665,8 @@ int user_main(SceSize argc, void* argp)
 	}
 #endif
 
-#ifdef PSP_SOFTWARE_VIDEO
-	// Bump up the clock frequency.
-//	if (tcpipAvailable)
-//	    scePowerSetClockFrequency(300, 300, 150); // Stop wifi problems
-//    else
-	    scePowerSetClockFrequency(333, 333, 166);
-#else
-	if (COM_CheckParm("-cpu333"))
-	{
-//	    if (tcpipAvailable)
-//	        scePowerSetClockFrequency(300, 300, 150); // Stop wifi problems
-//        else
-	        scePowerSetClockFrequency(333, 333, 166);
-    }
-#endif
+	// cypress -- always use 333MHz, fuck it!
+	scePowerSetClockFrequency(333, 333, 166);
 
 	if (COM_CheckParm("-gamedir")) {
 		char* tempStr = com_argv[COM_CheckParm("-gamedir")+1];

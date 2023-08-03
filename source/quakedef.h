@@ -23,10 +23,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define	QUAKE_GAME					// as opposed to utilities
 
-#define ENGINE_NAME "Insomnia ProQuake"
-#define ENGINE_VERSION 	"4.71 Rev3"
+#define ENGINE_NAME "Interstice ProQuake"
+#define ENGINE_VERSION 	"v5.00"
 #define ENGINE_HOMEPAGE_URL "http:////www.quakeone.com//proquake"
-#define PROQUAKE_SERIES_VERSION		4.71
+#define PROQUAKE_SERIES_VERSION		5.00
 
 #define PSP_MODEL_PHAT				0
 #define PSP_MODEL_SLIM 				1

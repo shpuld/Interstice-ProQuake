@@ -12,7 +12,7 @@ PSP_FW_VERSION  = 400
 #USE_GPROF		= 1
 
 # Site specific variables.
-INSTALL_DIR		= $(PSP_MOUNT)/PSP/GAME/Insomnia
+INSTALL_DIR		= $(PSP_MOUNT)/PSP/GAME/Interstice
 
 # Compiler specific variables.
 PSPSDK		= $(shell psp-config --pspsdk-path)
@@ -22,18 +22,18 @@ endif
 PSPLIBSDIR		= $(PSPSDK)/..
 
 # Project specific variables.
-VERSION		= 4.71 Rev4 64MB
+VERSION		= 5.00 UNIFIED
 SRC_DIR		= source
 OBJ_DIR		= build
 TARGET		= $(OBJ_DIR)/Quake
-PSP_EBOOT_TITLE	= Insomnia ProQuake $(VERSION)
+PSP_EBOOT_TITLE	= Interstice ProQuake v$(VERSION)
 PSP_EBOOT_ICON	= assets/eboot/icon.png
 PSP_EBOOT_PIC1	= assets/eboot/pic1.png
 PSP_EBOOT_SFO	= $(OBJ_DIR)/PARAM.SFO
 PSP_EBOOT		= $(OBJ_DIR)/EBOOT.PBP
 DIST_DIR		= dist
 DIST_FILES		= readme.html gpl.txt Quake/EBOOT.PBP
-ZIP_FILE		= Insomnia_v$(VERSION).zip
+ZIP_FILE		= Interstice_v$(VERSION).zip
 
 ifeq ($(USE_GPROF),1)
 GPROF_LIBS      = -lpspprof

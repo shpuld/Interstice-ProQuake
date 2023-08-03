@@ -30,6 +30,8 @@ typedef	int	fixed4_t;
 typedef	int	fixed8_t;
 typedef	int	fixed16_t;
 
+float rsqrt( float number );
+
 #ifndef M_PI
 #if defined(GU_PI)
 #define M_PI = GU_PI	// matches value in gcc v2 math.h
@@ -57,20 +59,7 @@ extern	int nanmask;
 #define VectorCopy(a,b) {b[0]=a[0];b[1]=a[1];b[2]=a[2];}
 #define VectorClear(a)		((a)[0] = (a)[1] = (a)[2] = 0)
 #define VectorNegate(a, b)	((b)[0] = -(a)[0], (b)[1] = -(a)[1], (b)[2] = -(a)[2])
-
-
-// MDave -- courtesy of johnfitz, lordhavoc
-#define VectorNormalizeFast(_v)\
-{\
-	float _y, _number;\
-	_number = DotProduct(_v, _v);\
-	if (_number != 0.0)\
-	{\
-		*((long *)&_y) = 0x5f3759df - ((* (long *) &_number) >> 1);\
-		_y = _y * (1.5f - (_number * 0.5f * _y * _y));\
-		VectorScale(_v, _y, _v);\
-	}\
-}
+#define VectorNormalizeFast( v ){float	ilength = (float)rsqrt(DotProduct(v,v));v[0] *= ilength;v[1] *= ilength;v[2] *= ilength; }
 
 
 #ifndef PSP

@@ -29,6 +29,32 @@ int nanmask = 255<<23;
 
 /*-----------------------------------------------------------------*/
 
+float rsqrt( float number )
+{
+	float d;
+    __asm__ (
+		".set			push\n"					// save assember option
+		".set			noreorder\n"			// suppress reordering
+		"lv.s			s000, %1\n"				// s000 = s
+		"vrsq.s			s000, s000\n"			// s000 = 1 / sqrt(s000)
+		"sv.s			s000, %0\n"				// d    = s000
+		".set			pop\n"					// restore assember option
+		: "=m"(d)
+		: "m"(number)
+	);
+	return d;
+}
+
+/*
+=================
+SinCos
+=================
+*/
+void SinCos( float radians, float *sine, float *cosine )
+{
+	vfpu_sincos(radians,sine,cosine);
+}
+
 void ProjectPointOnPlane( vec3_t dst, const vec3_t p, const vec3_t normal )
 {
 	float d;
@@ -131,7 +157,7 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 	m[1][2] = vf[1];
 	m[2][2] = vf[2];
 
-	memcpy( im, m, sizeof( im ) );
+	memcpy_vfpu( im, m, sizeof( im ) );
 
 	im[0][1] = m[1][0];
 	im[0][2] = m[2][0];
@@ -143,10 +169,10 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 	memset( zrot, 0, sizeof( zrot ) );
 	zrot[0][0] = zrot[1][1] = zrot[2][2] = 1.0F;
 
-	zrot[0][0] = cosf( DEG2RAD( degrees ) );
-	zrot[0][1] = sinf( DEG2RAD( degrees ) );
-	zrot[1][0] = -sinf( DEG2RAD( degrees ) );
-	zrot[1][1] = cosf( DEG2RAD( degrees ) );
+	zrot[0][0] = vfpu_cosf( DEG2RAD( degrees ) );
+	zrot[0][1] = vfpu_sinf( DEG2RAD( degrees ) );
+	zrot[1][0] = -vfpu_sinf( DEG2RAD( degrees ) );
+	zrot[1][1] = vfpu_cosf( DEG2RAD( degrees ) );
 
 	R_ConcatRotations( m, zrot, tmpmat );
 	R_ConcatRotations( tmpmat, im, rot );
@@ -334,14 +360,14 @@ void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 	float		sr, sp, sy, cr, cp, cy;
 
 	angle = angles[YAW] * (M_PI*2 / 360);
-	sy = sinf(angle);
-	cy = cosf(angle);
+	sy = vfpu_sinf(angle);
+	cy = vfpu_cosf(angle);
 	angle = angles[PITCH] * (M_PI*2 / 360);
-	sp = sinf(angle);
-	cp = cosf(angle);
+	sp = vfpu_sinf(angle);
+	cp = vfpu_cosf(angle);
 	angle = angles[ROLL] * (M_PI*2 / 360);
-	sr = sinf(angle);
-	cr = cosf(angle);
+	sr = vfpu_sinf(angle);
+	cr = vfpu_cosf(angle);
 
 	forward[0] = cp*cy;
 	forward[1] = cp*sy;

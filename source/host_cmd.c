@@ -685,9 +685,9 @@ void Host_SavegameComment (char *text)
 
 	for (i=0 ; i<SAVEGAME_COMMENT_LENGTH ; i++)
 		text[i] = ' ';
-	memcpy (text, cl.levelname, QMIN(strlen(cl.levelname),22)); //johnfitz -- only copy 22 chars.
+	memcpy_vfpu(text, cl.levelname, QMIN(strlen(cl.levelname),22)); //johnfitz -- only copy 22 chars.
 	snprintf(kills, sizeof(kills), "kills:%3i/%3i", cl.stats[STAT_MONSTERS], cl.stats[STAT_TOTALMONSTERS]);
-	memcpy (text+22, kills, strlen(kills));
+	memcpy_vfpu(text+22, kills, strlen(kills));
 // convert space to _ to make stdio happy
 	for (i=0 ; i<SAVEGAME_COMMENT_LENGTH ; i++)
 		if (text[i] == ' ')

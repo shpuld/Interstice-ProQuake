@@ -38,6 +38,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <psppower.h>
 #include <psprtc.h>
 
+#ifdef PROFILE
+#include <pspprof.h>
+#endif // PROFILE
+
 extern "C"
 {
 #include "../sys.h"
@@ -369,6 +373,13 @@ void Sys_Quit (void)
 
 	// Insert a false delay so files and stuff can be saved before the kernel kills us.
 	sceKernelDelayThread(50 * 1000);
+
+#ifdef PROFILE
+
+	gprof_cleanup();
+
+#endif // PROFILE
+
 
 	// Exit.
 	sceKernelExitGame();

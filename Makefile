@@ -35,14 +35,12 @@ DIST_DIR		= dist
 DIST_FILES		= readme.html gpl.txt Quake/EBOOT.PBP
 ZIP_FILE		= Insomnia_v$(VERSION).zip
 
-#ifeq ($(USE_GPROF),1)
-#GPROF_OBJS		= $(OBJ_DIR)/psp/prof.o $(OBJ_DIR)/psp/mcount.o
-#GPROF_FLAGS		= -pg -DPROFILE
-#else
-#BUILD_PRX		= 1
-#endif
-
-BUILD_PRX = 1
+ifeq ($(USE_GPROF),1)
+GPROF_LIBS      = -lpspprof
+GPROF_FLAGS		= -pg -DPROFILE
+else
+BUILD_PRX		= 1
+endif
 
 # Object files used regardless of video back end.
 COMMON_OBJS = \
@@ -135,16 +133,16 @@ endif
 OBJS	= $($(VIDEO)_VIDEO_ONLY_OBJS) $($(MP3LIB)_MP3LIB_ONLY_OBJS) $(COMMON_OBJS) $(GPROF_OBJS)
 
 # Compiler flags.
-CFLAGS	= -ffast-math -O3 -G0 $(GPROF_FLAGS) -Wall -Wno-trigraphs -Winline -DPSP $($(VIDEO)_VIDEO_ONLY_FLAGS) $($(MP3LIB)_MP3LIB_ONLY_FLAGS) -g
+CFLAGS	= -ffast-math -O3 -G0 $(GPROF_FLAGS) -Wall $(GPROF_FLAGS) -Wno-trigraphs -Winline -DPSP $($(VIDEO)_VIDEO_ONLY_FLAGS) $($(MP3LIB)_MP3LIB_ONLY_FLAGS) -g
 CXXFLAGS = -fno-rtti -Wcast-qual
 ASFLAGS = $(CFLAGS) -c
 
 # Libs.
 GU_LIBS 	= -lpspgum_vfpu -lpspvfpu -lpspgu
 AUDIO_LIBS	= -lpspaudiolib -lpspaudio -lpspaudiocodec source/psp/m33libs/libpspkubridge.a
-MISC_LIBS	= -lpsprtc -lpsppower
+MISC_LIBS	= -lpsprtc -lpsppower source/psp/misclibs/libpspmath.a
 STD_LIBS	= -lstdc++ -lm -lc
-LIBS		= $(GU_LIBS) $(AUDIO_LIBS) $(MISC_LIBS) $(STD_LIBS) -lpspwlan -lpspnet_adhoc -lpspnet_adhocctl
+LIBS		= $(GPROF_LIBS) $(GU_LIBS) $(AUDIO_LIBS) $(MISC_LIBS) $(STD_LIBS) -lpspwlan -lpspnet_adhoc -lpspnet_adhocctl
 
 # What else to clean.
 EXTRA_CLEAN	= $(foreach FILE,$(ZIP_FILE) Quake/EBOOT.PBP,$(DIST_DIR)/$(FILE))

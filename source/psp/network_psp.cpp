@@ -72,7 +72,7 @@ static pdpStatStruct gPdpStat;
 pdpStatStruct *findPdpStat(int socket, pdpStatStruct *pdpStat)
 {
 	if(socket == pdpStat->pdpId) {
-		memcpy(&gPdpStat, pdpStat, sizeof(pdpStatStruct));
+		memcpy_vfpu(&gPdpStat, pdpStat, sizeof(pdpStatStruct));
 		return &gPdpStat;
 	}
 		if(pdpStat->next) return findPdpStat(socket, pdpStat->next);
@@ -392,15 +392,18 @@ namespace quake
 
 			int get_socket_addr (int socket, struct qsockaddr *addr)
 			{
-				socklen_t addrlen = sizeof(struct qsockaddr);
-				unsigned int a;
+				pdpStatStruct pdpStat[20];
+				int length = sizeof(pdpStatStruct) * 20;
 
-				memset(addr, 0, sizeof(struct qsockaddr));
-				getsockname(socket, (struct sockaddr *)addr, &addrlen);
-				a = ((struct sockaddr_in *)addr)->sin_addr.s_addr;
-				if (a == 0 || a == inet_addr("127.0.0.1"))
-					((struct sockaddr_in *)addr)->sin_addr.s_addr = my_addr;
+				int err = sceNetAdhocGetPdpStat(&length, pdpStat);
+				if(err<0) return -1;
 
+				pdpStatStruct *tempPdp = findPdpStat(socket, pdpStat);
+				if(tempPdp->pdpId < 0) return -1;
+
+				memcpy_vfpu(((struct sockaddr_adhoc *)addr)->mac, tempPdp->mac, 6);
+				((struct sockaddr_adhoc *)addr)->port = tempPdp->port;
+				addr->sa_family = ADHOC_NET;
 				return 0;
 			}
 

@@ -423,8 +423,8 @@ void R_DrawSpriteModel (entity_t *ent)
 		break;
 	case SPR_VP_PARALLEL_ORIENTED: //faces view plane, but obeys roll value
 		angle = currententity->angles[ROLL] * M_PI_DIV_180;
-		sr = sin(angle);
-		cr = cos(angle);
+		sr = vfpu_sinf(angle);
+		cr = vfpu_cosf(angle);
 		v_right[0] = vright[0] * cr + vup[0] * sr;
 		v_up[0] = vright[0] * -sr + vup[0] * cr;
 		v_right[1] = vright[1] * cr + vup[1] * sr;
@@ -1848,8 +1848,8 @@ void R_SetupGL (void)
 			//variance should be a percentage of width, where width = 2 * tan(fov / 2)
 			//otherwise the effect is too dramatic at high FOV and too subtle at low FOV
 			//what a mess!
-			fovx = atan(tan(DEG2RAD(r_refdef.fov_x) / 2) * (0.97 + sin(cl.time * 1) * 0.04)) * 2 / M_PI_DIV_180;
-			fovy = atan(tan(DEG2RAD(r_refdef.fov_y) / 2) * (1.03 - sin(cl.time * 2) * 0.04)) * 2 / M_PI_DIV_180;
+			fovx = vfpu_atanf(vfpu_tanf(DEG2RAD(r_refdef.fov_x) / 2) * (0.97 + vfpu_sinf(cl.time * 1) * 0.04)) * 2 / M_PI_DIV_180;
+			fovy = vfpu_atanf(vfpu_tanf(DEG2RAD(r_refdef.fov_y) / 2) * (1.03 - vfpu_sinf(cl.time * 2) * 0.04)) * 2 / M_PI_DIV_180;
 
 			//old method where variance was a percentage of fov
 			//fovx = r_refdef.fov_x * (0.98 + sin(cl.time * 1.5) * 0.02);

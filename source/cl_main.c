@@ -735,7 +735,7 @@ static void CL_RelinkEntities (void)
 		{
 			ent->angles[1] = bobjrotate;
 			if (cl_bobbing.value)
-				ent->origin[2] += sin(bobjrotate / 90 * M_PI) * 5 + 5;
+				ent->origin[2] += vfpu_sinf(bobjrotate / 90 * M_PI) * 5 + 5;
 		}
 
 		// EF_BRIGHTFIELD is not used by original progs

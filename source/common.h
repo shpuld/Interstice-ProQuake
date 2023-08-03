@@ -108,11 +108,12 @@ typedef struct link_s
 extern	qboolean		bigendien;
 
 extern	short	(*BigShort) (short l);
-extern	short	(*LittleShort) (short l);
 extern	int	(*BigLong) (int l);
-extern	int	(*LittleLong) (int l);
 extern	float	(*BigFloat) (float l);
-extern	float	(*LittleFloat) (float l);
+
+#define LittleLong(l) l
+#define LittleShort(l) l
+#define LittleFloat(l) l
 
 //============================================================================
 

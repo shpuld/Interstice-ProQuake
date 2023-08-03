@@ -47,6 +47,7 @@ BUILD_PRX = 1
 # Object files used regardless of video back end.
 COMMON_OBJS = \
 	$(OBJ_DIR)/psp/battery.o \
+	$(OBJ_DIR)/psp/VramExt.o \
 	$(OBJ_DIR)/psp/input.o \
 	$(OBJ_DIR)/psp/main.o \
 	$(OBJ_DIR)/psp/math.o \

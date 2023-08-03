@@ -39,6 +39,7 @@ extern "C"
 #include "sysmem_module.h"
 #include "m33libs/include/kubridge.h"
 int pspDveMgrSetVideoOut(int, int, int, int, int, int, int);
+void VramSetSize(int kb);
 }
 
 #include "battery.hpp"
@@ -556,6 +557,36 @@ void StartUpParams(char **args, int argc, char *cmdlinePath, char *currentDirect
 	}
 }
 
+SceUID vram_module;
+
+void InitEdramModule(void)
+{
+	char currentDirectory[1024];
+	char gameDirectory[1024];
+	char path_f[256];
+
+	memset(gameDirectory, 0, sizeof(gameDirectory));
+	memset(currentDirectory, 0, sizeof(currentDirectory));
+	getcwd(currentDirectory, sizeof(currentDirectory) - 1);
+
+	strcpy(path_f, currentDirectory);
+	strcat(path_f, "/hooks/vramext.prx");
+	
+	vram_module = pspSdkLoadStartModule(path_f, PSP_MEMORY_PARTITION_KERNEL);
+	if (vram_module >= 0 && psp_system_model != PSP_MODEL_PHAT) {
+		VramSetSize(4096);
+	}
+}
+
+void ShutdownEdramModule(void)
+{
+	if (vram_module < 0)
+		return;
+
+	sceKernelStopModule(vram_module, 0, 0, 0, 0);
+	sceKernelUnloadModule(vram_module);
+}
+
 int main(int argc, char *argv[])		
 {
 #ifdef KERNEL_MODE
@@ -589,7 +620,8 @@ int user_main(SceSize argc, void* argp)
 	// operations.
 	disableFloatingPointExceptions();
 
-	// Initialise the Common module.
+	// Enable full VRAM access on non-PHAT model units
+	InitEdramModule();
 
 	// Get the current working dir.
 	char currentDirectory[1024];
@@ -789,6 +821,7 @@ int user_main(SceSize argc, void* argp)
 	}
 
 	// Quit.
+	ShutdownEdramModule();
 	Sys_Quit();
 	return 0;
 }

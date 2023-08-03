@@ -133,7 +133,7 @@ endif
 OBJS	= $($(VIDEO)_VIDEO_ONLY_OBJS) $($(MP3LIB)_MP3LIB_ONLY_OBJS) $(COMMON_OBJS) $(GPROF_OBJS)
 
 # Compiler flags.
-CFLAGS	= -ffast-math -O3 -G0 $(GPROF_FLAGS) -Wall $(GPROF_FLAGS) -Wno-trigraphs -Winline -DPSP $($(VIDEO)_VIDEO_ONLY_FLAGS) $($(MP3LIB)_MP3LIB_ONLY_FLAGS) -g
+CFLAGS	= -ffast-math -Ofast -G0 $(GPROF_FLAGS) -Wall $(GPROF_FLAGS) -Wno-trigraphs -Winline -DPSP $($(VIDEO)_VIDEO_ONLY_FLAGS) $($(MP3LIB)_MP3LIB_ONLY_FLAGS) -g
 CXXFLAGS = -fno-rtti -Wcast-qual
 ASFLAGS = $(CFLAGS) -c
 

@@ -48,11 +48,8 @@ namespace quake
 	namespace video
 	{
 		// Types.
-#ifdef NORMAL_MODEL
 		typedef ScePspRGB565	pixel;
-#else
-		typedef ScePspRGBA8888	pixel;
-#endif
+
 		typedef u8				texel;
 		typedef u16				depth_value;
 
@@ -190,12 +187,7 @@ void VID_Init(unsigned char* palette)
 		void* const draw_buffer_in_vram		= reinterpret_cast<char*>(draw_buffer) - reinterpret_cast<std::size_t>(vram_base);
 		void* const depth_buffer_in_vram	= reinterpret_cast<char*>(depth_buffer) - reinterpret_cast<std::size_t>(vram_base);
 
-#ifdef NORMAL_MODEL
         sceGuDrawBuffer(GU_PSM_5650, draw_buffer_in_vram, 512);
-#else
-        sceGuDrawBuffer(GU_PSM_8888, draw_buffer_in_vram, 512);
-#endif
-
 		sceGuDispBuffer(screen_width, screen_height, display_buffer_in_vram, 512);
 		sceGuDepthBuffer(depth_buffer_in_vram, 512);
 
@@ -548,18 +540,9 @@ void SCR_ScreenShot_f (void)
 		for (int x = 0; x < glwidth; ++x)
 		{
 			const pixel argb = *src++;
-
-#ifdef NORMAL_MODEL
-// For RGB 565 pixel format
 			buffer[i++]	= ((argb >> 11) & 0x1f) << 3;
 			buffer[i++]	= ((argb >> 5) & 0x3f) << 2;
 			buffer[i++]	= (argb & 0x1f) << 3;
-#else
-// For RGB 888 pixel format
-			buffer[i++]	= (argb >> 16) & 0xff;
-			buffer[i++]	= (argb >> 8) & 0xff;
-			buffer[i++]	= argb & 0xff;
-#endif
 		}
 	}
 	COM_WriteFile (pcxname, buffer, glwidth*glheight*3 + 18 );

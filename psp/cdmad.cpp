@@ -358,7 +358,7 @@ void CDAudio_Update(void)
 
 
 	// Fill the input buffer.
-	if (strcmpi(bgmtype.string,"cd") == 0) {
+	if (strcasecmp(bgmtype.string,"cd") == 0) {
 		if (playing == false) {
 			CDAudio_Play(last_track, (qboolean) false);
 		}

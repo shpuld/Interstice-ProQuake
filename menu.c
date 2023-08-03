@@ -73,8 +73,6 @@ int health_regen;
 int safe_spawn;
 int no_bots;
 
-refdef_t	r_refdef;
-
 #endif
 
 extern qboolean bmg_type_changed;
@@ -456,9 +454,6 @@ void M_Main_Draw (void)
     	M_DrawTransPic (54, 32 + m_main_cursor * 20,Draw_CachePic( va("gfx/menudot%i.lmp", f+1 ) ) );
     }
 
-        b = Draw_CachePic ("gfx/m_bttns.lmp");
-	    M_DrawPic ( (320-b->width)/2, 248, b );
-
 		M_Print (112, 0, va("Version %4.2f", (float) PROQUAKE_SERIES_VERSION));
 }
 
@@ -537,9 +532,6 @@ void M_SinglePlayer_Draw (void)
 {
 	int		f;
 	qpic_t	*p,*b, *n, *l, *s, *t;
-
-	b = Draw_CachePic ("gfx/m_bttns.lmp");
-	M_DrawPic ( (320-b->width)/2, 248, b );
 
 	if (kurok)
 	{
@@ -717,9 +709,6 @@ void M_Load_Draw (void)
 	int		i;
 	qpic_t	*p, *b;
 
-	b = Draw_CachePic ("gfx/m_bttns.lmp");
-	M_DrawPic ( (320-b->width)/2, 248, b );
-
     if (kurok)
     {
         p = Draw_CachePic ("gfx/menu/sp/load_0.lmp");
@@ -745,9 +734,6 @@ void M_Save_Draw (void)
 {
 	int		i;
 	qpic_t	*p, *b;
-
-	b = Draw_CachePic ("gfx/m_bttns.lmp");
-	M_DrawPic ( (320-b->width)/2, 248, b );
 
     if (kurok)
     {
@@ -887,8 +873,6 @@ void M_MultiPlayer_Draw (void)
 
 	qpic_t	*p,*b, *j, *c, *t, *i, *a;
 
-    b = Draw_CachePic ("gfx/m_bttns.lmp");
-	M_DrawPic ( (320-b->width)/2, 248, b );
 	
 	if (kurok)
 	{
@@ -1243,8 +1227,6 @@ void M_Setup_Draw (void)
 	    if (setup_cursor == 1+offset)
 		    M_DrawCharacter (168 + 8*strlen(setup_myname), setup_cursor_table [setup_cursor], 10+((int)(realtime*4)&1));
     }
-    b = Draw_CachePic ("gfx/m_bttns.lmp");
-	M_DrawPic ( (320-b->width)/2, 248, b );
 	p = Draw_CachePic ("gfx/p_multi.lmp");
 	M_DrawPic ( (320-p->width)/2, 4, p);
 
@@ -1540,8 +1522,6 @@ void M_Net_Draw (void)
 	{
 		M_DrawTransPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp") );
     }
-    b = Draw_CachePic ("gfx/m_bttns.lmp");
-	M_DrawPic ( (320-b->width)/2, 248, b );
 	p = Draw_CachePic ("gfx/p_multi.lmp");
 	M_DrawPic ( (320-p->width)/2, 4, p);
 
@@ -2027,7 +2007,7 @@ void M_AdjustSliders (int dir)
 				break;
 /*
 			case OPT_MUSICTYPE: // bgm type
-				if (strcmpi(bgmtype.string,"cd") == 0)
+				if (strcasecmp(bgmtype.string,"cd") == 0)
 				{
 						Cvar_SetStringByRef (&bgmtype, "none");
 						bmg_type_changed = true;
@@ -2160,8 +2140,6 @@ void M_Options_Draw (void)
 	    M_DrawCharacter (200, offset + options_cursor*8, 12+((int)(realtime*4)&1));
     }
 
-    b = Draw_CachePic ("gfx/m_bttns.lmp");
-	M_DrawPic ( (320-b->width)/2, 248, b );
 
 	M_Print (16, offset+(OPT_CUSTOMIZE*8), "     Customize Buttons");
 	M_Print (16, offset+(OPT_CONSOLE*8),   "         Go to console");
@@ -2287,7 +2265,7 @@ void M_Options_Draw (void)
 			M_DrawSlider (220, offset+(OPT_SNDVOL*8), r);
 /*
 			M_Print (16, offset+(OPT_MUSICTYPE*8),"          MP3 Playback");
-			if (strcmpi(bgmtype.string,"cd") == 0)
+			if (strcasecmp(bgmtype.string,"cd") == 0)
 				M_Print (220, offset+(OPT_MUSICTYPE*8), "On");
 			else
 				M_Print (220, offset+(OPT_MUSICTYPE*8), "Off");
@@ -2656,9 +2634,6 @@ void M_Keys_Draw (void)
 
 	p = Draw_CachePic ("gfx/ttl_cstm.lmp");
 	M_DrawPic ( (320-p->width)/2, 4, p);
-
-	b = Draw_CachePic ("gfx/m_bttns.lmp");
-	M_DrawPic ( (320-b->width)/2, 248, b );
 
 #ifdef PSP
 	if (bind_grab)
@@ -3370,8 +3345,6 @@ void M_SerialConfig_Draw (void)
 	if (!kurok)
 	    M_DrawTransPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp") );
 
-    b = Draw_CachePic ("gfx/m_bttns.lmp");
-	M_DrawPic ( (320-b->width)/2, 248, b );
 	p = Draw_CachePic ("gfx/p_multi.lmp");
 	basex = (320-p->width)/2;
 	M_DrawPic (basex, 4, p);
@@ -3653,8 +3626,6 @@ void M_ModemConfig_Draw (void)
 	if (!kurok)
 		M_DrawTransPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp") );
 
-    b = Draw_CachePic ("gfx/m_bttns.lmp");
-	M_DrawPic ( (320-b->width)/2, 248, b );
 	p = Draw_CachePic ("gfx/p_multi.lmp");
 	basex = (320-p->width)/2;
 	M_DrawPic (basex, 4, p);
@@ -3843,8 +3814,6 @@ void M_LanConfig_Draw (void)
 	if (!kurok)
 	    M_DrawTransPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp") );
 
-    b = Draw_CachePic ("gfx/m_bttns.lmp");
-	M_DrawPic ( (320-b->width)/2, 248, b );
 	p = Draw_CachePic ("gfx/p_multi.lmp");
 	basex = (320-p->width)/2;
 	M_DrawPic (basex, 4, p);
@@ -4273,9 +4242,7 @@ void M_GameOptions_Draw (void)
         // line cursor
 	    M_DrawCharacter (144, gameoptions_cursor_table[gameoptions_cursor], 12+((int)(realtime*4)&1));
     }
-
-    b = Draw_CachePic ("gfx/m_bttns.lmp");
-	M_DrawPic ( (320-b->width)/2, 248, b );
+	
 	p = Draw_CachePic ("gfx/p_multi.lmp");
 	M_DrawPic ( (320-p->width)/2, 4, p);
 

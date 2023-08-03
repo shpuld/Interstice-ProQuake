@@ -36,9 +36,7 @@ extern "C"
 int LIGHTMAP_BYTES;
 int MAX_LIGHTMAPS;
 
-using namespace std;
-
-list<int> mapTextureNameList;
+std::list<int> mapTextureNameList;
 
 model_t	*loadmodel;
 char	loadname[32];	// for hunk tags

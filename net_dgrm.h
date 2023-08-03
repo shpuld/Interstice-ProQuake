@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // net_dgrm.h
 
 #ifdef PSP_NETWORKING_CODE
-int net_driver_to_use;
+extern int net_driver_to_use;
 #endif
 
 int			Datagram_Init (void);

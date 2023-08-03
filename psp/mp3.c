@@ -34,6 +34,7 @@ int done = 0;
 int mp3_job_started = 0;
 
 int mp3_volume;
+int changeMp3Volume;
 
 static int mp3_src_pos = 0;
 

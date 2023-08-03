@@ -68,6 +68,8 @@ unsigned long inet_addr(const char *cp);
 
 static int net_landriverlevel;
 
+int net_driver_to_use;
+
 // statistic counters
 int	packetsSent = 0;
 int	packetsReSent = 0;
@@ -1357,9 +1359,9 @@ static qsocket_t *_Datagram_CheckNewConnections (void)
 	if (mod != MOD_QSMACK)
 	{
 		if (pq_password.value && (len <= 18 || pq_password.value != MSG_ReadLong()))
-			return Datagram_Reject("Óåòöåò éó ðáóó÷ïòä ðòïôåãôåäŸ\nYou must use ProQuake v3.1 or above\n(http://www.quakeone.com/proquake) and set pq_password to the server password\n", acceptsock, &clientaddr);
+			return Datagram_Reject("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\nYou must use ProQuake v3.1 or above\n(http://www.quakeone.com/proquake) and set pq_password to the server password\n", acceptsock, &clientaddr);
 		if (pq_cheatfree && (mod != MOD_PROQUAKE || mod_version < 32))
-			return Datagram_Reject("Ôèéó éó á ãèåáô­æòåå óåòöåòŸ\nYou must use ProQuake v3.2 or above\n(http://www.quakeone.com/proquake)\n", acceptsock, &clientaddr);
+			return Datagram_Reject("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½\nYou must use ProQuake v3.2 or above\n(http://www.quakeone.com/proquake)\n", acceptsock, &clientaddr);
 	}
 #endif
 

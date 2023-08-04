@@ -208,6 +208,9 @@ typedef struct {
 
 uimod_t games_found[25];
 
+//
+// COMPATIBILITY LIST
+//
 void register_game(const char* dirname, int index)
 {
 	games_found[index].has_pretty_name = false;
@@ -295,12 +298,21 @@ void register_game(const char* dirname, int index)
 	// LibreQuake
 	else if (strcasecmp(dirname, "lq1") == 0) {
 		games_found[index].has_pretty_name = true;
-		games_found[index].pretty_name = static_cast<char*>(malloc(sizeof(char)*32));
+		games_found[index].pretty_name = static_cast<char*>(malloc(sizeof(char)*16));
 		sprintf(games_found[index].pretty_name, "LibreQuake", dirname);
 		games_found[index].heap_phat = 13 * 1024 * 1024;
 		games_found[index].heap_slim = 32 * 1024 * 1024;
 		games_found[index].status_phat = GAME_STATUS_BAD;
 		games_found[index].status_slim = GAME_STATUS_DECENT;
+	}
+	// Kickflip Quake
+	else if (strcasecmp(dirname, "skate") == 0) {
+		games_found[index].has_pretty_name = true;
+		games_found[index].pretty_name = static_cast<char*>(malloc(sizeof(char)*16));
+		sprintf(games_found[index].pretty_name, "Kickflip Quake", dirname);
+		games_found[index].heap_phat = 13 * 1024 * 1024;
+		games_found[index].heap_slim = 20 * 1024 * 1024;
+		games_found[index].status_phat = games_found[index].status_slim = GAME_STATUS_DECENT;
 	}
 }
 

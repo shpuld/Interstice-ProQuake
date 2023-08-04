@@ -323,6 +323,62 @@ void register_game(const char* dirname, int index)
 		games_found[index].heap_slim = 32 * 1024 * 1024;
 		games_found[index].status_phat = games_found[index].status_slim = GAME_STATUS_BAD;
 	}
+	// NAVY SEALS
+	else if (strcasecmp(dirname, "navyseal") == 0) {
+		games_found[index].has_pretty_name = true;
+		games_found[index].pretty_name = static_cast<char*>(malloc(sizeof(char)*16));
+		sprintf(games_found[index].pretty_name, "NAVY SEALS", dirname);
+		games_found[index].heap_phat = 13 * 1024 * 1024;
+		games_found[index].heap_slim = 20 * 1024 * 1024;
+		games_found[index].status_phat = games_found[index].status_slim = GAME_STATUS_BAD;
+	}
+	// Beyond Belief
+	else if (strcasecmp(dirname, "bbelief") == 0) {
+		games_found[index].has_pretty_name = true;
+		games_found[index].pretty_name = static_cast<char*>(malloc(sizeof(char)*16));
+		sprintf(games_found[index].pretty_name, "Beyond Belief", dirname);
+		games_found[index].heap_phat = 13 * 1024 * 1024;
+		games_found[index].heap_slim = 20 * 1024 * 1024;
+		games_found[index].status_phat = games_found[index].status_slim = GAME_STATUS_PERFECT;
+	}
+	// Rubicon 2
+	else if (strcasecmp(dirname, "rubicon2") == 0) {
+		games_found[index].has_pretty_name = true;
+		games_found[index].pretty_name = static_cast<char*>(malloc(sizeof(char)*16));
+		sprintf(games_found[index].pretty_name, "Rubicon 2", dirname);
+		games_found[index].heap_phat = 13 * 1024 * 1024;
+		games_found[index].heap_slim = 32 * 1024 * 1024;
+		games_found[index].status_phat = GAME_STATUS_BAD;
+		games_found[index].status_slim = GAME_STATUS_DECENT;
+	}
+	// The Punishment Due
+	else if (strcasecmp(dirname, "pun") == 0) {
+		games_found[index].has_pretty_name = true;
+		games_found[index].pretty_name = static_cast<char*>(malloc(sizeof(char)*32));
+		sprintf(games_found[index].pretty_name, "The Punishment Due", dirname);
+		games_found[index].heap_phat = 13 * 1024 * 1024;
+		games_found[index].heap_slim = 32 * 1024 * 1024;
+		games_found[index].status_phat = games_found[index].status_slim = GAME_STATUS_BAD;
+	}
+	// Terra
+	else if (strcasecmp(dirname, "terra") == 0) {
+		games_found[index].has_pretty_name = true;
+		games_found[index].pretty_name = static_cast<char*>(malloc(sizeof(char)*32));
+		sprintf(games_found[index].pretty_name, "Terra", dirname);
+		games_found[index].heap_phat = 13 * 1024 * 1024;
+		games_found[index].heap_slim = 20 * 1024 * 1024;
+		games_found[index].status_phat = games_found[index].status_slim = GAME_STATUS_PERFECT;
+	}
+	// Honey
+	else if (strcasecmp(dirname, "honey") == 0) {
+		games_found[index].has_pretty_name = true;
+		games_found[index].pretty_name = static_cast<char*>(malloc(sizeof(char)*32));
+		sprintf(games_found[index].pretty_name, "Honey", dirname);
+		games_found[index].heap_phat = 13 * 1024 * 1024;
+		games_found[index].heap_slim = 32 * 1024 * 1024;
+		games_found[index].status_phat = GAME_STATUS_BAD;
+		games_found[index].status_slim = GAME_STATUS_DECENT;
+	}
 }
 
 int Random_Int (int max_int)

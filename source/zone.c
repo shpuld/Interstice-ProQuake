@@ -799,8 +799,7 @@ void *Hunk_AllocName (int size, char *name)
 	size = sizeof(hunk_t) + ((size+15)&~15);
 
 	if (hunk_size - hunk_low_used - hunk_high_used < size)
-		Sys_Error ("Not enough RAM allocated.  Try using \"-mem 64\" on the command line.");
-//		Sys_Error ("Hunk_Alloc: failed on %i bytes",size);
+		Sys_Error ("Insufficied RAM for allocation.");
 
 	h = (hunk_t *)(hunk_base + hunk_low_used);
 	hunk_low_used += size;
@@ -888,7 +887,7 @@ void *Hunk_HighAllocName (int size, char *name)
 	size = sizeof(hunk_t) + ((size+15)&~15);
 
 	if (hunk_size - hunk_low_used - hunk_high_used < size)
-		Sys_Error ("Not enough RAM allocated.  Try using \"-mem 64\" on the command line.");
+		Sys_Error ("Insufficied RAM for allocation.");
 //	{
 //		Con_Printf ("Hunk_HighAlloc: failed on %i bytes\n",size);
 //		return NULL;

@@ -393,13 +393,15 @@ int Random_Int (int max_int)
 
 char* GenerateSplashText(void)
 {
-	int num = Random_Int(4);
+	int num = Random_Int(6);
 
 	switch(num) {
 		case 1: return "DO NOT PET THE SHAMBLER"; break;
 		case 2: return "SHUB-NIGGURATH USES THE HARD R"; break;
 		case 3: return "NOW WITCH CHUNKIER PIXELS"; break;
 		case 4: return "erm...."; break;
+		case 5: return "THE SHAMBLER HAS FUR"; break;
+		case 6: return "THE SHAMBLER HAS NO FUR"; break;
 		default: return "GPLv2 since '99"; break;
 	}
 }

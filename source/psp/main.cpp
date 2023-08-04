@@ -314,6 +314,15 @@ void register_game(const char* dirname, int index)
 		games_found[index].heap_slim = 20 * 1024 * 1024;
 		games_found[index].status_phat = games_found[index].status_slim = GAME_STATUS_DECENT;
 	}
+	// Quake Xmas Jam 2018
+	else if (strcasecmp(dirname, "xmasjam2018") == 0) {
+		games_found[index].has_pretty_name = true;
+		games_found[index].pretty_name = static_cast<char*>(malloc(sizeof(char)*32));
+		sprintf(games_found[index].pretty_name, "Quake Xmas Jam 2018", dirname);
+		games_found[index].heap_phat = 13 * 1024 * 1024;
+		games_found[index].heap_slim = 32 * 1024 * 1024;
+		games_found[index].status_phat = games_found[index].status_slim = GAME_STATUS_BAD;
+	}
 }
 
 int Random_Int (int max_int)

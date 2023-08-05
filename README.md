@@ -1,4 +1,4 @@
-# Interstice ProQuake v5.00
+# Interstice ProQuake v5.01
 
 This repository contains _Interstice_, an interation upon [_Insomnia_](https://github.com/darkduke606/Insomnia-ProQuake-Engine), part of the bloodline of ProQuake sourceports for the PlayStation Portable handheld.
 
@@ -9,10 +9,61 @@ Build with `make`.
 
 `build_release.sh` is a script to automate the build process, as well as place controller bindings and other important files from `assets`. It also downloads the shareware version of Quake from archive.org for easy, legal distribution.
 
-<br>
-<br>
+## Compatibility List
+| Mod Name | Directory Name | Status (PHAT) | Status (SLIM) |
+|----------|:--------------:|:-------------:|:--------------|
+| Quake | `id1` | Good | Good |
+| Scourge of Armagon | `hypnotic` | Good | Good |
+| Dissolution of Eternity | `rogue` | Decent | Good |
+| In The Shadows | `shadows` | Unplayable | Unplayable |
+| UltraQuake | `ultraquake` | Unplayable | Unplayable |
+| I WANT TOAST | `toast` | Good | Good |
+| Abandon | `abandon` | Good | Good |
+| Dimension of the Past | `dopa` | Good | Good |
+| LibreQuake | `lq1` | Unplayable | Decent |
+| Kickflip Quake | `skate` | Good | Good |
+| Quake Xmas Jam 2018 | `xmasjam2018` | Unplayable | Unplayable |
+| NAVY SEALS | `navyseal` | Unplayable | Unplayable |
+| Beyond Belief | `bbelief` | Good | Good |
+| Rubicon 2 | `rubicon2` | Unplayable | Decent |
+| The Punishment Due | `pun` | Unplayable | Unplayable |
+| Terra | `terra` | Good | Good |
+| Honey | `honey` | Unplayable | Decent |
+| Air Quake I | `airquake` | Unplayable | Good |
+| Quake I Arena | `q1a` | Good | Good |
+| Slide | `slide` | Unplayable | Unplayable |
+| X-MEN: Ravages of Apocalypse | `xmen` | Unplayable | Unplayable |
+| Abyss of Pandemonium - The Final Mission | `aop` | Decent | Good |
 
-### 5.00 Changelog
+
+    
+
+## Changelog
+
+### 5.01
+* Add more compatibility list entries:
+  - Kickflip Quake
+  - Quake Xmas Jam 2018
+  - NAVY SEALS
+  - Beyond Belief
+  - Rubicon 2
+  - The Punishment Due
+  - Terra
+  - Honey
+  - AirQuake I
+  - Quake I Arena
+  - Slide
+  - X-MEN: Ravages of Apocalypse
+  - Abyss of Pandemonium - The Final Mission
+* The Quake hunk being used completely no longer suggests applying `-mem 64` to `quake.cmdline`.
+* Textures greater than 800px in width or height now forcefully resampled (fixes `progs/skater.mdl` in Kickflip Quake)
+* Add new splash texts on the mod interface:
+  - THE SHAMBLER HAS FUR
+  - THE SHAMBLER HAS NO FUR
+  - 50% compatibility on a good day!
+  - technically i'm saying anything
+
+### 5.00 (First Release)
 * Several optmizations inherited from [NZ:P Engine (dQuakePlus)](https://github.com/nzp-team/dquakeplus), [ADQuake](https://github.com/st1x51/adquake), and [FTEQW](https://github.com/fte-team/fteqw).
 * A unified binary: No separate EBOOT.PBP files for low and high memory systems, with no compromises made to high memory system advantage.
 * Restructured source to remove depreciated features, and adopt the `gu_` code standard (as opposed to `video_hardware`).

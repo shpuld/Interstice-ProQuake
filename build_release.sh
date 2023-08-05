@@ -12,6 +12,7 @@ cp build/EBOOT.PBP release/
 cp assets/hooks/ release/
 cp assets/quake.cmdline release/
 cp assets/gpl-2.0.txt release/
+cp README.md release/
 cp assets/config.cfg release/id1/
 
 #download shareware pak from archive.org

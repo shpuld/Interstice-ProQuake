@@ -116,3 +116,7 @@ void	Cmd_Print (char *text);
 // used by command functions to send output to either the graphics console or
 // passed as a print message to the client
 
+void Cmd_ExecPatch_f (void);
+// This is basically a duplicate of Cmd_Exec_f
+// but its not accessible via CLI because it goes out of the game dir, instead
+// checking <installdir>/patches/<gamedir>/ for "patch.cfg".

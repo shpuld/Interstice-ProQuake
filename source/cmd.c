@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // cmd.c -- Quake script command processing module
 
 #include "quakedef.h"
+#include <pspiofilemgr.h>
 
 void Cmd_ForwardToServer_f (void);
 
@@ -329,6 +330,59 @@ static void Cmd_StuffCmds_f (void)
 	Z_Free (build);
 }
 
+char* BuildStringFromChunk(char* str, int start, int end)
+{
+    // Allocate the chunk for the string
+    char* chunk = malloc(sizeof(char)*((end - start) + 1));
+
+    // Fill the chunk.
+    for (int ofs = 0; ofs < end - start; ofs++) {
+        chunk[ofs] = str[ofs + start];
+        chunk[ofs + 1] = '\0';
+    }
+
+    return chunk;
+}
+
+/*
+===============
+Cmd_ExecPatch_f
+===============
+*/
+void Cmd_ExecPatch_f(void)
+{
+	//
+	// really nasty hack to get just the game directory
+	//
+	int slash_index = 0;
+
+	for (int i = 0; i < strlen(com_gamedir); i++) {
+		if (com_gamedir[i] == '/')
+			slash_index = i;
+	}
+
+	char* game_dir = BuildStringFromChunk(com_gamedir, slash_index + 1, strlen(com_gamedir));
+
+	int file = sceIoOpen(va("patches/%s/patch.cfg", game_dir), PSP_O_RDONLY, 0);
+
+	// File exists, execute it.
+	if (file >= 0) {
+		SceIoStat file_info;
+		sceIoGetstat(va("patches/%s/patch.cfg", game_dir), &file_info);
+
+		char* buffer = (char*)calloc(file_info.st_size+1, sizeof(char));
+		sceIoRead(file, buffer, file_info.st_size);
+
+		// Use Add instead of Insert to ensure it runs after anything in
+		// quake.rc.
+		Cbuf_AddText (buffer);
+
+		// Clean up.
+		sceIoClose(file);
+		free(buffer);
+		free(game_dir);
+	}
+}
 
 /*
 ===============

@@ -1148,6 +1148,7 @@ void Host_Init (quakeparms_t *parms)
 	}
 
 	Cbuf_InsertText ("exec quake.rc\n");
+	Cmd_ExecPatch_f ();
 
 #ifdef PROQUAKE_EXTENSION
 	// Baker 3.80x: this is a hack

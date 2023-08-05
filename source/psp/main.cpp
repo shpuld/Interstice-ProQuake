@@ -363,7 +363,7 @@ void register_game(const char* dirname, int index)
 	// Terra
 	else if (strcasecmp(dirname, "terra") == 0) {
 		games_found[index].has_pretty_name = true;
-		games_found[index].pretty_name = static_cast<char*>(malloc(sizeof(char)*32));
+		games_found[index].pretty_name = static_cast<char*>(malloc(sizeof(char)*8));
 		sprintf(games_found[index].pretty_name, "Terra", dirname);
 		games_found[index].heap_phat = 13 * 1024 * 1024;
 		games_found[index].heap_slim = 20 * 1024 * 1024;
@@ -372,12 +372,22 @@ void register_game(const char* dirname, int index)
 	// Honey
 	else if (strcasecmp(dirname, "honey") == 0) {
 		games_found[index].has_pretty_name = true;
-		games_found[index].pretty_name = static_cast<char*>(malloc(sizeof(char)*32));
+		games_found[index].pretty_name = static_cast<char*>(malloc(sizeof(char)*8));
 		sprintf(games_found[index].pretty_name, "Honey", dirname);
 		games_found[index].heap_phat = 13 * 1024 * 1024;
 		games_found[index].heap_slim = 32 * 1024 * 1024;
 		games_found[index].status_phat = GAME_STATUS_BAD;
 		games_found[index].status_slim = GAME_STATUS_DECENT;
+	}
+	// Air Quake I
+	else if (strcasecmp(dirname, "airquake") == 0) {
+		games_found[index].has_pretty_name = true;
+		games_found[index].pretty_name = static_cast<char*>(malloc(sizeof(char)*16));
+		sprintf(games_found[index].pretty_name, "Air Quake I", dirname);
+		games_found[index].heap_phat = 13 * 1024 * 1024;
+		games_found[index].heap_slim = 32 * 1024 * 1024;
+		games_found[index].status_phat = GAME_STATUS_BAD;
+		games_found[index].status_slim = GAME_STATUS_PERFECT;
 	}
 }
 

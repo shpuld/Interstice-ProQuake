@@ -29,7 +29,7 @@ server_static_t	svs;
 
 cvar_t  sv_progs = {"sv_progs", "progs.dat" };
 
-cvar_t	sv_defaultmap = {"sv_defaultmap",""}; //Baker 3.95: R00k
+cvar_t	sv_defaultmap = {"sv_defaultmap","start"}; //Baker 3.95: R00k
 cvar_t	sv_ipmasking = {"sv_ipmasking","1",false, true}; //Baker 3.95: R00k
 #ifdef ANTIWALLHACK_SERVER
 cvar_t	sv_cullentities = {"sv_cullentities", "1", false, true}; // Baker 3.99c: Rook and I both think sv_cullentities is better cvar name than sv_cullplayers

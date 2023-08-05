@@ -49,6 +49,7 @@ extern cvar_t   r_i_model_animation;
 extern cvar_t   t_i_model_transform;
 extern cvar_t	pq_drawfps;
 extern cvar_t   sv_aim;
+extern cvar_t 	sv_defaultmap;
 extern cvar_t   noexit;
 
 ////////////////////////////////////////////////////////////////////
@@ -629,7 +630,10 @@ void M_SinglePlayer_Key (int key)
 			safe_spawn =
 			no_bots = 0;
 
-			Cbuf_AddText ("map start\n");
+			if (strcasecmp(sv_defaultmap.string, "") == 0)
+				Cbuf_AddText("map start\n");
+			else
+				Cbuf_AddText(va("map %s\n", sv_defaultmap.string));
 			break;
 
 		case 1:

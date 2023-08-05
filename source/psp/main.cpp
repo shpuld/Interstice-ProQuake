@@ -389,6 +389,16 @@ void register_game(const char* dirname, int index)
 		games_found[index].status_phat = GAME_STATUS_BAD;
 		games_found[index].status_slim = GAME_STATUS_PERFECT;
 	}
+	// Quake I Arena
+	else if (strcasecmp(dirname, "q1a") == 0) {
+		games_found[index].has_pretty_name = true;
+		games_found[index].pretty_name = static_cast<char*>(malloc(sizeof(char)*16));
+		sprintf(games_found[index].pretty_name, "Quake I Arena", dirname);
+		games_found[index].heap_phat = 13 * 1024 * 1024;
+		games_found[index].heap_slim = 20 * 1024 * 1024;
+		games_found[index].status_phat = GAME_STATUS_PERFECT;
+		games_found[index].status_slim = GAME_STATUS_PERFECT;
+	}
 }
 
 int Random_Int (int max_int)

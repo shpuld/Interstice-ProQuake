@@ -10,6 +10,7 @@ mkdir -p release/id1
 make clean && make
 cp build/EBOOT.PBP release/
 cp assets/hooks/ release/
+cp assets/patches/ release/
 cp assets/quake.cmdline release/
 cp assets/gpl-2.0.txt release/
 cp README.md release/

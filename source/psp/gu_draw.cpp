@@ -1250,17 +1250,21 @@ int GL_LoadTexture (const char *identifier, int width, int height, const byte *d
 	texture.stretch_to_power_of_two	= stretch_to_power_of_two != qfalse;
 
 	// Fill in the texture description.
-           texture.format = GU_PSM_T8;
+    texture.format 			= GU_PSM_T8;
 	texture.filter			= filter;
 	texture.mipmaps			= mipmap_level;
 
+	if (width > 800) tex_scale_down = true;
+	if (height > 800) tex_scale_down = true;
+
 	if (tex_scale_down == true && texture.stretch_to_power_of_two == true) {
-		texture.width			= std::max(round_down(width), 32U);
-		texture.height			= std::max(round_down(height),32U);
+		texture.width			= std::max(round_down(width), 32U)/2;
+		texture.height			= std::max(round_down(height),32U)/2;
 	} else {
 		texture.width			= std::max(round_up(width), 32U);
 		texture.height			= std::max(round_up(height),32U);
 	}
+	
 
 	for (int i=0; i <= mipmap_level;i++) {
 		int div = (int) powf(2,i);

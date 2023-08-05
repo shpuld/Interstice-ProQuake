@@ -312,7 +312,7 @@ void register_game(const char* dirname, int index)
 		sprintf(games_found[index].pretty_name, "Kickflip Quake", dirname);
 		games_found[index].heap_phat = 13 * 1024 * 1024;
 		games_found[index].heap_slim = 20 * 1024 * 1024;
-		games_found[index].status_phat = games_found[index].status_slim = GAME_STATUS_DECENT;
+		games_found[index].status_phat = games_found[index].status_slim = GAME_STATUS_PERFECT;
 	}
 	// Quake Xmas Jam 2018
 	else if (strcasecmp(dirname, "xmasjam2018") == 0) {
@@ -393,7 +393,7 @@ int Random_Int (int max_int)
 
 char* GenerateSplashText(void)
 {
-	int num = Random_Int(6);
+	int num = Random_Int(8);
 
 	switch(num) {
 		case 1: return "DO NOT PET THE SHAMBLER"; break;
@@ -402,6 +402,8 @@ char* GenerateSplashText(void)
 		case 4: return "erm...."; break;
 		case 5: return "THE SHAMBLER HAS FUR"; break;
 		case 6: return "THE SHAMBLER HAS NO FUR"; break;
+		case 7: return "50\% compatibility on a good day!"; break;
+		case 8: return "technically i'm saying anything"; break;
 		default: return "GPLv2 since '99"; break;
 	}
 }

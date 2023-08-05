@@ -399,6 +399,36 @@ void register_game(const char* dirname, int index)
 		games_found[index].status_phat = GAME_STATUS_PERFECT;
 		games_found[index].status_slim = GAME_STATUS_PERFECT;
 	}
+	// Slide
+	else if (strcasecmp(dirname, "slide") == 0) {
+		games_found[index].has_pretty_name = true;
+		games_found[index].pretty_name = static_cast<char*>(malloc(sizeof(char)*8));
+		sprintf(games_found[index].pretty_name, "Slide", dirname);
+		games_found[index].heap_phat = 13 * 1024 * 1024;
+		games_found[index].heap_slim = 20 * 1024 * 1024;
+		games_found[index].status_phat = GAME_STATUS_BAD;
+		games_found[index].status_slim = GAME_STATUS_BAD;
+	}
+	// X-MEN: Ravages of Apocalypse
+	else if (strcasecmp(dirname, "xmen") == 0) {
+		games_found[index].has_pretty_name = true;
+		games_found[index].pretty_name = static_cast<char*>(malloc(sizeof(char)*32));
+		sprintf(games_found[index].pretty_name, "X-MEN: Ravages of Apocalypse", dirname);
+		games_found[index].heap_phat = 13 * 1024 * 1024;
+		games_found[index].heap_slim = 32 * 1024 * 1024;
+		games_found[index].status_phat = GAME_STATUS_BAD;
+		games_found[index].status_slim = GAME_STATUS_BAD;
+	}
+	// Abyss of Pandemonium - The Final Mission
+	else if (strcasecmp(dirname, "aop") == 0) {
+		games_found[index].has_pretty_name = true;
+		games_found[index].pretty_name = static_cast<char*>(malloc(sizeof(char)*64));
+		sprintf(games_found[index].pretty_name, "Abyss of Pandemonium - The Final Mission", dirname);
+		games_found[index].heap_phat = 13 * 1024 * 1024;
+		games_found[index].heap_slim = 32 * 1024 * 1024;
+		games_found[index].status_phat = GAME_STATUS_DECENT;
+		games_found[index].status_slim = GAME_STATUS_PERFECT;
+	}
 }
 
 int Random_Int (int max_int)

@@ -614,6 +614,14 @@ void StartUpParams(char **args, int argc, char *cmdlinePath, char *currentDirect
 				
 						f_argc += 2;
 					}
+
+					// Clean up all that memory we allocated
+					for (int i = 0; i < 25; i++) {
+						if (games_found[i].dir != NULL)
+							delete games_found[i].dir;
+						if (games_found[i].pretty_name != NULL)
+							delete games_found[i].pretty_name;
+					}
 				}
 				if (pad.Buttons & PSP_CTRL_UP){
 					cursor_index--;

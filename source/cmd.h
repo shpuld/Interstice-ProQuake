@@ -120,3 +120,5 @@ void Cmd_ExecPatch_f (void);
 // This is basically a duplicate of Cmd_Exec_f
 // but its not accessible via CLI because it goes out of the game dir, instead
 // checking <installdir>/patches/<gamedir>/ for "patch.cfg".
+
+void Cmd_ExecID1Config_f (void);

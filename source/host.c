@@ -132,6 +132,8 @@ cvar_t	pq_dequake = {"pq_dequake", "1"};
 cvar_t	pq_drawfps = {"pq_drawfps","0", true};	// set for running times - muff
 cvar_t	pq_maxfps = {"pq_maxfps", "65", true}; // MrG - max_fps
 
+extern qboolean exec_id1_config;
+
 /*
 ================
 Host_EndGame
@@ -1149,6 +1151,13 @@ void Host_Init (quakeparms_t *parms)
 
 	Cbuf_InsertText ("exec quake.rc\n");
 	Cmd_ExecPatch_f ();
+
+	// For mods that play identically to gameplay,
+	// make sure we run the stock id1 config file
+	// so players dont have to rebind controls
+	// or other flags needlessly.
+	if (exec_id1_config == true)
+		Cmd_ExecID1Config_f ();
 
 #ifdef PROQUAKE_EXTENSION
 	// Baker 3.80x: this is a hack

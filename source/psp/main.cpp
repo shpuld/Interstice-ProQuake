@@ -47,6 +47,7 @@ void VramSetSize(int kb);
 
 // Running a dedicated server?
 qboolean isDedicated = qfalse;
+qboolean exec_id1_config;
 
 extern	int  com_argc;
 extern	char **com_argv;
@@ -199,6 +200,7 @@ typedef struct {
 	int status_slim;
 	bool has_pretty_name;
 	bool occupied;
+	bool exec_id1_config;
 } uimod_t;
 
 #define GAME_STATUS_UNKNOWN 	0
@@ -219,6 +221,7 @@ void register_game(const char* dirname, int index)
 	games_found[index].dir = static_cast<char*>(malloc(sizeof(char)*32));
 	sprintf(games_found[index].dir, "%s", dirname);
 	games_found[index].status_phat = games_found[index].status_slim = GAME_STATUS_UNKNOWN;
+	games_found[index].exec_id1_config = false;
 
 	// Quake
 	if (strcasecmp(dirname, "id1") == 0) {
@@ -237,6 +240,7 @@ void register_game(const char* dirname, int index)
 		games_found[index].heap_phat = 13 * 1024 * 1024;
 		games_found[index].heap_slim = 28 * 1024 * 1024;
 		games_found[index].status_phat = games_found[index].status_slim = GAME_STATUS_PERFECT;
+		games_found[index].exec_id1_config = true;
 	}
 	// Quake Mission Pack 2: Dissolution of Eternity
 	else if (strcasecmp(dirname, "rogue") == 0) {
@@ -247,6 +251,7 @@ void register_game(const char* dirname, int index)
 		games_found[index].heap_slim = 28 * 1024 * 1024;
 		games_found[index].status_phat = GAME_STATUS_DECENT;
 		games_found[index].status_slim = GAME_STATUS_PERFECT;
+		games_found[index].exec_id1_config = true;
 	}
 	// In The Shadows
 	else if (strcasecmp(dirname, "shadows") == 0) {
@@ -267,6 +272,7 @@ void register_game(const char* dirname, int index)
 		games_found[index].heap_slim = 32 * 1024 * 1024;
 		games_found[index].status_phat = GAME_STATUS_BAD;
 		games_found[index].status_slim = GAME_STATUS_BAD;
+		games_found[index].exec_id1_config = true;
 	}
 	// I WANT TOAST
 	else if (strcasecmp(dirname, "toast") == 0) {
@@ -276,6 +282,7 @@ void register_game(const char* dirname, int index)
 		games_found[index].heap_phat = 13 * 1024 * 1024;
 		games_found[index].heap_slim = 20 * 1024 * 1024;
 		games_found[index].status_phat = games_found[index].status_slim = GAME_STATUS_PERFECT;
+		games_found[index].exec_id1_config = true;
 	}
 	// Abandon
 	else if (strcasecmp(dirname, "abandon") == 0) {
@@ -285,6 +292,7 @@ void register_game(const char* dirname, int index)
 		games_found[index].heap_phat = 13 * 1024 * 1024;
 		games_found[index].heap_slim = 20 * 1024 * 1024;
 		games_found[index].status_phat = games_found[index].status_slim = GAME_STATUS_PERFECT;
+		games_found[index].exec_id1_config = true;
 	}
 	// Dimension of the Past
 	else if (strcasecmp(dirname, "dopa") == 0) {
@@ -294,6 +302,7 @@ void register_game(const char* dirname, int index)
 		games_found[index].heap_phat = 13 * 1024 * 1024;
 		games_found[index].heap_slim = 24 * 1024 * 1024;
 		games_found[index].status_phat = games_found[index].status_slim = GAME_STATUS_PERFECT;
+		games_found[index].exec_id1_config = true;
 	}
 	// LibreQuake
 	else if (strcasecmp(dirname, "lq1") == 0) {
@@ -304,6 +313,7 @@ void register_game(const char* dirname, int index)
 		games_found[index].heap_slim = 32 * 1024 * 1024;
 		games_found[index].status_phat = GAME_STATUS_BAD;
 		games_found[index].status_slim = GAME_STATUS_DECENT;
+		games_found[index].exec_id1_config = true;
 	}
 	// Kickflip Quake
 	else if (strcasecmp(dirname, "skate") == 0) {
@@ -340,6 +350,7 @@ void register_game(const char* dirname, int index)
 		games_found[index].heap_phat = 13 * 1024 * 1024;
 		games_found[index].heap_slim = 20 * 1024 * 1024;
 		games_found[index].status_phat = games_found[index].status_slim = GAME_STATUS_PERFECT;
+		games_found[index].exec_id1_config = true;
 	}
 	// Rubicon 2
 	else if (strcasecmp(dirname, "rubicon2") == 0) {
@@ -350,6 +361,7 @@ void register_game(const char* dirname, int index)
 		games_found[index].heap_slim = 32 * 1024 * 1024;
 		games_found[index].status_phat = GAME_STATUS_BAD;
 		games_found[index].status_slim = GAME_STATUS_DECENT;
+		games_found[index].exec_id1_config = true;
 	}
 	// The Punishment Due
 	else if (strcasecmp(dirname, "pun") == 0) {
@@ -368,6 +380,7 @@ void register_game(const char* dirname, int index)
 		games_found[index].heap_phat = 13 * 1024 * 1024;
 		games_found[index].heap_slim = 20 * 1024 * 1024;
 		games_found[index].status_phat = games_found[index].status_slim = GAME_STATUS_PERFECT;
+		games_found[index].exec_id1_config = true;
 	}
 	// Honey
 	else if (strcasecmp(dirname, "honey") == 0) {
@@ -378,6 +391,7 @@ void register_game(const char* dirname, int index)
 		games_found[index].heap_slim = 32 * 1024 * 1024;
 		games_found[index].status_phat = GAME_STATUS_BAD;
 		games_found[index].status_slim = GAME_STATUS_DECENT;
+		games_found[index].exec_id1_config = true;
 	}
 	// Air Quake I
 	else if (strcasecmp(dirname, "airquake") == 0) {
@@ -398,6 +412,7 @@ void register_game(const char* dirname, int index)
 		games_found[index].heap_slim = 20 * 1024 * 1024;
 		games_found[index].status_phat = GAME_STATUS_PERFECT;
 		games_found[index].status_slim = GAME_STATUS_PERFECT;
+		games_found[index].exec_id1_config = true;
 	}
 	// Slide
 	else if (strcasecmp(dirname, "slide") == 0) {
@@ -428,6 +443,7 @@ void register_game(const char* dirname, int index)
 		games_found[index].heap_slim = 32 * 1024 * 1024;
 		games_found[index].status_phat = GAME_STATUS_DECENT;
 		games_found[index].status_slim = GAME_STATUS_PERFECT;
+		games_found[index].exec_id1_config = true;
 	}
 }
 
@@ -600,6 +616,9 @@ void StartUpParams(char **args, int argc, char *cmdlinePath, char *currentDirect
 					} else {
 						heapSize = (size_t)games_found[cursor_index].heap_slim;
 					}
+
+					if (games_found[cursor_index].exec_id1_config == true)
+						exec_id1_config = qtrue;
 
 					// Don't do -game parm stuff if its id1 (fixes booting shareware)
 					if (strcasecmp(games_found[cursor_index].dir, "id1") != 0) {

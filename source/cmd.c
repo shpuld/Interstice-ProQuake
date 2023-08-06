@@ -346,6 +346,33 @@ char* BuildStringFromChunk(char* str, int start, int end)
 
 /*
 ===============
+Cmd_ExecID1Config_f
+===============
+*/
+void Cmd_ExecID1Config_f(void)
+{
+	int file = sceIoOpen("id1/config.cfg", PSP_O_RDONLY, 0);
+
+	// File exists, execute it.
+	if (file >= 0) {
+		SceIoStat file_info;
+		sceIoGetstat("id1/config.cfg", &file_info);
+
+		char* buffer = (char*)calloc(file_info.st_size+1, sizeof(char));
+		sceIoRead(file, buffer, file_info.st_size);
+
+		// Use Add instead of Insert to ensure it runs after anything in
+		// quake.rc.
+		Cbuf_AddText (buffer);
+
+		// Clean up.
+		sceIoClose(file);
+		free(buffer);
+	}
+}
+
+/*
+===============
 Cmd_ExecPatch_f
 ===============
 */

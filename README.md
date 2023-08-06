@@ -20,7 +20,7 @@ Build with `make`.
 | I WANT TOAST | `toast` | Good | Good |
 | Abandon | `abandon` | Good | Good |
 | Dimension of the Past | `dopa` | Good | Good |
-| LibreQuake | `lq1` | Unplayable | Decent |
+| LibreQuake | `lq1` | Decent | Decent |
 | Kickflip Quake | `skate` | Good | Good |
 | Quake Xmas Jam 2018 | `xmasjam2018` | Unplayable | Unplayable |
 | NAVY SEALS | `navyseal` | Unplayable | Unplayable |

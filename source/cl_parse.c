@@ -505,7 +505,17 @@ if (bits&(1<<i))
 
 	if (bits & U_MODEL)
 	{
+
+#ifdef SUPPORTS_KUROK_PROTOCOL
+
+		modnum = MSG_ReadShort ();
+
+#else
+
 		modnum = MSG_ReadByte ();
+
+#endif // SUPPORTS_KUROK_PROTOCOL
+
 		if (modnum >= MAX_MODELS)
 			Host_Error ("CL_ParseUpdate: bad modelindex");
 	}
@@ -680,7 +690,16 @@ static void CL_ParseBaseline (entity_t *ent)
 	int			i;
 //	Con_Printf("cl_parse.c baseline start\n");
 
+#ifdef SUPPORTS_KUROK_PROTOCOL
+
+	ent->baseline.modelindex = MSG_ReadShort ();
+
+#else
+
 	ent->baseline.modelindex = MSG_ReadByte ();
+
+#endif // SUPPORTS_KUROK_PROTOCOL
+
 	ent->baseline.frame = MSG_ReadByte ();
 	ent->baseline.colormap = MSG_ReadByte();
 	ent->baseline.skin = MSG_ReadByte();

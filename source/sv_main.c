@@ -915,7 +915,16 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg, qboolean nomap)
 			MSG_WriteByte (msg,e);
 
 		if (bits & U_MODEL)
+
+#ifdef SUPPORTS_KUROK_PROTOCOL
+
+			MSG_WriteShort (msg, ent->v.modelindex);
+
+#else
+
 			MSG_WriteByte (msg,	ent->v.modelindex);
+
+#endif // SUPPORTS_KUROK_PROTOCOL
 
 #ifdef SUPPORTS_KUROK_PROTOCOL
     // Tomaz - QC Alpha Scale Glow Begin
@@ -1414,7 +1423,16 @@ void SV_CreateBaseline (void)
 		MSG_WriteByte (&sv.signon,svc_spawnbaseline);
 		MSG_WriteShort (&sv.signon,entnum);
 
+#ifdef SUPPORTS_KUROK_PROTOCOL
+
+		MSG_WriteShort (&sv.signon, svent->baseline.modelindex);
+
+#else
+
 		MSG_WriteByte (&sv.signon, svent->baseline.modelindex);
+
+#endif // SUPPORTS_KUROK_PROTOCOL
+
 		MSG_WriteByte (&sv.signon, svent->baseline.frame);
 		MSG_WriteByte (&sv.signon, svent->baseline.colormap);
 		MSG_WriteByte (&sv.signon, svent->baseline.skin);

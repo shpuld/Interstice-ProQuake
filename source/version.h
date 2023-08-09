@@ -156,7 +156,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // ADDITIONS
 # define SUPPORTS_KUROK
 #ifdef SUPPORTS_KUROK
-//#define SUPPORTS_KUROK_PROTOCOL	// This doesn't exist!  // The protocol part
+#define SUPPORTS_KUROK_PROTOCOL	// This doesn't exist!  // The protocol part
 #define SUPPORTS_COLORED_LIGHTS		// The colored lights part
 #endif
 #define SUPPORTS_HARDWARE_ANIM_INTERPOLATION

@@ -880,6 +880,8 @@ void _Host_Frame (double time)
 	}
 #endif
 
+	Con_Printf("%s kB RAM free\n", pspSdkTotalFreeUserMemSize());
+
 	host_framecount++;
 	//frame speed counter
 	fps_count++;//muff

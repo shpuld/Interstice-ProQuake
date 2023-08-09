@@ -106,8 +106,18 @@ void	VID_UnlockBuffer (void);
 #define	MAX_DATAGRAM		1024			// max length of unreliable message
 
 // per-level limits
-#define	MAX_EDICTS		600
+#define	MAX_EDICTS		1024
+
+#ifdef SUPPORTS_KUROK_PROTOCOL
+
+#define MAX_MODELS 		512
+
+#else
+
 #define	MAX_MODELS		256			// these are sent over the net as bytes
+
+#endif // SUPPROTS_KUROK_PROTOCOL
+
 #define	MAX_SOUNDS		256			// so they cannot be blindly increased
 
 #define	MAX_LIGHTSTYLES	64

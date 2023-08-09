@@ -88,7 +88,7 @@ void PF_objerror (void)
 	ED_Print (ed);
 	ED_Free (ed);
 
-	Host_Error ("Program error");
+	//Host_Error ("Program error");
 }
 
 
@@ -1578,7 +1578,15 @@ void PF_makestatic (void)
 
 	MSG_WriteByte (&sv.signon,svc_spawnstatic);
 
+#ifdef SUPPORTS_KUROK_PROTOCOL
+
+	MSG_WriteShort (&sv.signon, SV_ModelIndex(pr_strings + ent->v.model));
+
+#else
+
 	MSG_WriteByte (&sv.signon, SV_ModelIndex(pr_strings + ent->v.model));
+
+#endif // SUPPORTS_KUROK_PROTOCOL
 
 	MSG_WriteByte (&sv.signon, ent->v.frame);
 	MSG_WriteByte (&sv.signon, ent->v.colormap);

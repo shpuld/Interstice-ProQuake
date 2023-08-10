@@ -481,7 +481,7 @@ void R_NewMap (void)
 
     // Reset these back to normal.
 #ifdef SUPPORTS_KUROK
-    if(kurok)
+    if(IS_KUROK)
         Cbuf_AddText ("viewsize 120\n chase_active 0\n");
 #endif
 
@@ -496,7 +496,7 @@ void R_NewMap (void)
 		if (!strncmp(cl.worldmodel->textures[i]->name,"sky",3) )
 			skytexturenum = i;
 #ifdef SUPPORTS_KUROK
-	  	if (kurok)
+	  	if (IS_KUROK)
 		{
 			if (!strncmp(cl.worldmodel->textures[i]->name,"glass",5) )
 				mirrortexturenum = i;

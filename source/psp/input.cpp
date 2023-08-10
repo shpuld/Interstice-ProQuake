@@ -317,7 +317,7 @@ void IN_Move (usercmd_t *cmd)
 			analog_strafe = 1;
 	}
 
-	if(kurok)
+	if(IS_KUROK)
 	{
 		if(scr_fov.value <= 25)
 		{

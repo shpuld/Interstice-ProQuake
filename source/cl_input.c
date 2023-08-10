@@ -292,7 +292,7 @@ void CL_AdjustAngles (void)
 #endif
 
 #ifdef SUPPORTS_KUROK
-    if (kurok)
+    if (IS_KUROK)
     {
 		extern cvar_t scr_fov;
         if(scr_fov.value <= 25)

@@ -198,6 +198,7 @@ typedef struct {
 	int heap_slim;
 	int status_phat;
 	int status_slim;
+	int compat_mode;
 	bool has_pretty_name;
 	bool occupied;
 	bool exec_id1_config;
@@ -222,6 +223,7 @@ void register_game(const char* dirname, int index)
 	sprintf(games_found[index].dir, "%s", dirname);
 	games_found[index].status_phat = games_found[index].status_slim = GAME_STATUS_UNKNOWN;
 	games_found[index].exec_id1_config = false;
+	games_found[index].compat_mode = COMPAT_QUAKE;
 
 	// Quake
 	if (strcasecmp(dirname, "id1") == 0) {
@@ -241,6 +243,7 @@ void register_game(const char* dirname, int index)
 		games_found[index].heap_slim = 28 * 1024 * 1024;
 		games_found[index].status_phat = games_found[index].status_slim = GAME_STATUS_PERFECT;
 		games_found[index].exec_id1_config = true;
+		games_found[index].compat_mode = COMPAT_HIPNOTIC;
 	}
 	// Quake Mission Pack 2: Dissolution of Eternity
 	else if (strcasecmp(dirname, "rogue") == 0) {
@@ -252,6 +255,7 @@ void register_game(const char* dirname, int index)
 		games_found[index].status_phat = GAME_STATUS_DECENT;
 		games_found[index].status_slim = GAME_STATUS_PERFECT;
 		games_found[index].exec_id1_config = true;
+		games_found[index].compat_mode = COMPAT_ROGUE;
 	}
 	// In The Shadows
 	else if (strcasecmp(dirname, "shadows") == 0) {
@@ -620,6 +624,8 @@ void StartUpParams(char **args, int argc, char *cmdlinePath, char *currentDirect
 					if (games_found[cursor_index].exec_id1_config == true)
 						exec_id1_config = qtrue;
 
+					compat_gametype = games_found[cursor_index].compat_mode;
+
 					// Don't do -game parm stuff if its id1 (fixes booting shareware)
 					if (strcasecmp(games_found[cursor_index].dir, "id1") != 0) {
 						// Set the game param to the mod of choice
@@ -768,14 +774,6 @@ int user_main(SceSize argc, void* argp)
 		
 	if (CheckParm(args, f_argc, "-nearest")) {
 		char* tempStr = args[CheckParm(args, f_argc,"-nearest")+1];
-	}
-	
-	if (CheckParm(args, f_argc, "-hipnotic")) {
-	char* tempStr = args[CheckParm(args, f_argc,"-hipnotic")+1];
-	}
-	
-	if (CheckParm(args, f_argc, "-rogue")) {
-	char* tempStr = args[CheckParm(args, f_argc,"-rogue")+1];
 	}
 	
 	if (CheckParm(args, f_argc, "-modmusic")) {

@@ -209,7 +209,7 @@ void DropPunchAngle (void)
 	len = VectorNormalize (sv_player->v.punchangle);
 
 #ifdef SUPPORTS_KUROK
-	if(kurok)
+	if(IS_KUROK)
 		len -= 25*host_frametime;
 	else
 #endif
@@ -240,7 +240,7 @@ void SV_WaterMove (void)
 	if (!cmd.forwardmove && !cmd.sidemove && !cmd.upmove)
 	{
 #ifdef SUPPORTS_KUROK
-        if (!kurok)
+        if (!IS_KUROK)
 #endif
 		    wishvel[2] -= 60;		// drift towards bottom
     }
@@ -656,7 +656,7 @@ void SV_RunClients (void)
 		{
 			SV_ClientThink ();
 #ifdef PSP_MP3_SUPPORT
-			if(kurok)
+			if(IS_KUROK)
 			{
                 Cvar_SetStringByRef (&bgmtype, "cd");
                 bmg_type_changed = true;
@@ -664,7 +664,7 @@ void SV_RunClients (void)
 		}
 		else
 		{
-		    if(kurok)
+		    if(IS_KUROK)
 		    {
                 Cvar_SetStringByRef (&bgmtype,"none");
                 bmg_type_changed = true;

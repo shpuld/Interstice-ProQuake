@@ -106,18 +106,8 @@ void	VID_UnlockBuffer (void);
 #define	MAX_DATAGRAM		1024			// max length of unreliable message
 
 // per-level limits
-#define	MAX_EDICTS		1024
-
-#ifdef SUPPORTS_KUROK_PROTOCOL
-
-#define MAX_MODELS 		512
-
-#else
-
+#define	MAX_EDICTS		600
 #define	MAX_MODELS		256			// these are sent over the net as bytes
-
-#endif // SUPPROTS_KUROK_PROTOCOL
-
 #define	MAX_SOUNDS		256			// so they cannot be blindly increased
 
 #define	MAX_LIGHTSTYLES	64
@@ -285,6 +275,7 @@ typedef struct
 #include "cdaudio.h"
 #include "psp/gu_psp.h"
 
+#include "compat.h"
 #include "location.h"	// JPG - for %l formatting speficier
 // PSP should support IPLOG but disable by default; uses a lot of memory
 #include "iplog.h"		// JPG 1.05 - ip address logging

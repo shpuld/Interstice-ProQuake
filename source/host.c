@@ -880,7 +880,7 @@ void _Host_Frame (double time)
 	}
 #endif
 
-	Con_Printf("%s kB RAM free\n", pspSdkTotalFreeUserMemSize());
+	//Con_Printf("%d kB RAM free\n", pspSdkTotalFreeUserMemSize());
 
 	host_framecount++;
 	//frame speed counter
@@ -1003,7 +1003,7 @@ void Host_Init (quakeparms_t *parms)
 	}
 	#endif // Windows only
 
-	if (standard_quake)
+	if (IS_QUAKE)
 		minimum_memory = MINIMUM_MEMORY;
 	else
 		minimum_memory = MINIMUM_MEMORY_LEVELPAK;

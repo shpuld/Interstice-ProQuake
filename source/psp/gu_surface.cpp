@@ -700,7 +700,7 @@ void R_RenderBrushPoly (msurface_t *fa)
             (!strncmp(fa->texinfo->texture->name,"{",1)))
 	{
 
-		if (kurok)
+		if (IS_KUROK)
 		{
 		    sceGuDepthMask(GU_TRUE);
 		    sceGuDisable(GU_ALPHA_TEST);
@@ -723,7 +723,7 @@ void R_RenderBrushPoly (msurface_t *fa)
 	// No lightmaps.
     else if (!strncmp(fa->texinfo->texture->name,"light",5))
     {
-		if (kurok)
+		if (IS_KUROK)
 		{
 		    DrawGLPoly (fa->polys);
 			return;
@@ -735,7 +735,7 @@ void R_RenderBrushPoly (msurface_t *fa)
     // Surface uvmaps warp, like metal or glass effects.
 	else if (!strncmp(fa->texinfo->texture->name,"env",3))
 	{
-		if (kurok)
+		if (IS_KUROK)
 			EmitReflectivePolys (fa);
 		else
             DrawGLPoly (fa->polys);
@@ -746,7 +746,7 @@ void R_RenderBrushPoly (msurface_t *fa)
 	{
         if (r_glassalpha.value < 1)
 		{
-			if (kurok)
+			if (IS_KUROK)
 			{
                 float alpha1 = r_glassalpha.value;
 				float alpha2 = 1 - r_glassalpha.value;
@@ -766,7 +766,7 @@ void R_RenderBrushPoly (msurface_t *fa)
 		}
 		else
 		{
-			if (kurok)
+			if (IS_KUROK)
 				EmitReflectivePolys (fa);
 			else
 				DrawGLPoly (fa->polys);

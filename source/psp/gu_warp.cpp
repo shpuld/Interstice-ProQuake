@@ -441,7 +441,7 @@ EmitSkyPolys
 void EmitSkyPolys (msurface_t *fa)
 {
 
-  if (!kurok)
+  if (!IS_KUROK)
   {
 
 	for (const glpoly_t* p = fa->polys; p; p = p->next)
@@ -570,7 +570,7 @@ void EmitBothSkyLayers (msurface_t *fa)
 	GL_Bind (solidskytexture);
 
 #ifdef SUPPORTS_KUROK
-	if (kurok)
+	if (IS_KUROK)
 		speedscale = cl.time*2;
 	else
 #endif
@@ -585,7 +585,7 @@ void EmitBothSkyLayers (msurface_t *fa)
 
 	GL_Bind (alphaskytexture);
 #ifdef SUPPORTS_KUROK
-	if (kurok)
+	if (IS_KUROK)
 		speedscale = cl.time*4;
 	else
 #endif
@@ -1080,7 +1080,7 @@ void Sky_NewMap (void)
 			return; // error
 		strcpy(value, com_token);
 
-        if (kurok)
+        if (IS_KUROK)
         {
             if (!strcmp("sky", key))
                 Sky_LoadSkyBox(value);
@@ -1594,7 +1594,7 @@ void R_DrawSkyChain (msurface_t *s)
         // used when gl_texsort is on
         GL_Bind(solidskytexture);
 
-        if (kurok)
+        if (IS_KUROK)
             speedscale = realtime*2;
         else
             speedscale = realtime*8;
@@ -1609,7 +1609,7 @@ void R_DrawSkyChain (msurface_t *s)
 
         GL_Bind (alphaskytexture);
 
-        if (kurok)
+        if (IS_KUROK)
             speedscale = realtime*4;
         else
             speedscale = realtime*16;

@@ -2048,7 +2048,7 @@ void R_Mirror (void)
 
 	msurface_t	*s;
 
-if(!kurok)
+if(!IS_KUROK)
 {
 
 	float		d;

@@ -407,7 +407,7 @@ void M_Main_Draw (void)
 	int		f;
 	qpic_t	*p,*b, *s, *m, *o, *h, *q, *t;
 
-	if (kurok)
+	if (IS_KUROK)
 	{
         t = Draw_CachePic ("gfx/menu/title.lmp");
     	M_DrawPic ((320-t->width)/2, 16, t);
@@ -504,7 +504,7 @@ void M_Main_Key (int key)
 			M_Menu_Help_f ();
 			break;
 
-//        if(!kurok)
+//        if(!IS_KUROK)
 //        {
     		case 4:
 	   		  M_Menu_Quit_f ();
@@ -534,7 +534,7 @@ void M_SinglePlayer_Draw (void)
 	int		f;
 	qpic_t	*p,*b, *n, *l, *s, *t;
 
-	if (kurok)
+	if (IS_KUROK)
 	{
         t = Draw_CachePic ("gfx/menu/title.lmp");
     	M_DrawPic ((320-t->width)/2, 16, t);
@@ -607,7 +607,7 @@ void M_SinglePlayer_Key (int key)
 				Cbuf_AddText ("disconnect\n");
 			Cbuf_AddText ("maxplayers 1\n");
 
-            if(kurok)
+            if(IS_KUROK)
                 Cbuf_AddText ("viewsize 120\n cl_gunpitch 0\n fov 90\n scr_ofsy 0\n cl_autoaim 1\n chase_active 0\n");
 
 			// If we were in a multiplayer game, reset all the deathmatch flags to 0;
@@ -713,7 +713,7 @@ void M_Load_Draw (void)
 	int		i;
 	qpic_t	*p, *b;
 
-    if (kurok)
+    if (IS_KUROK)
     {
         p = Draw_CachePic ("gfx/menu/sp/load_0.lmp");
         // line cursor
@@ -739,7 +739,7 @@ void M_Save_Draw (void)
 	int		i;
 	qpic_t	*p, *b;
 
-    if (kurok)
+    if (IS_KUROK)
     {
         p = Draw_CachePic ("gfx/menu/sp/save_0.lmp");
         // line cursor
@@ -777,7 +777,7 @@ void M_Load_Key (int key)
 	// stack space has been used, so do it now
 		SCR_BeginLoadingPlaque ();
 
-		if(kurok)
+		if(IS_KUROK)
 			Cbuf_AddText ("viewsize 120\n cl_gunpitch 0\n fov 90\n scr_ofsy 0\n cl_autoaim 1\n chase_active 0\n");
 
 			// If we were in a multiplayer game, reset all the deathmatch flags to 0;
@@ -878,7 +878,7 @@ void M_MultiPlayer_Draw (void)
 	qpic_t	*p,*b, *j, *c, *t, *i, *a;
 
 	
-	if (kurok)
+	if (IS_KUROK)
 	{
 //        M_DrawTransPic (72, 32, Draw_CachePic ("gfx/menu/multi_0.lmp") );
 
@@ -1213,7 +1213,7 @@ void M_Setup_Draw (void)
 	int     offset = 0;
 	int				top, bottom, tc, bc;
 
-	if (kurok)
+	if (IS_KUROK)
 	{
 	    if (setup_cursor == 0+offset)
 		    M_DrawCharacter (168 + 8*strlen(setup_hostname), setup_cursor_table [setup_cursor], 10+((int)(realtime*30)&1));
@@ -1250,7 +1250,7 @@ void M_Setup_Draw (void)
 	M_DrawTextBox (160, 48+offset, 16, 1);
 	M_Print (168, 56+offset, setup_myname);
 
-	if(!kurok)
+	if(!IS_KUROK)
 	{
 		M_Print (64, 80+offset, "Top color");
 		M_Print (64, 104+offset, "Bottom color");
@@ -1275,7 +1275,7 @@ void M_Setup_Draw (void)
 	Draw_Fill ( 248, 72+offset, 56, 28, top);
 	Draw_Fill ( 248, 72+28+offset, 56, 28, bottom);
 
-	if(!kurok)
+	if(!IS_KUROK)
 	{
 		p = Draw_CachePic ("gfx/menuplyr.lmp");
 //		M_BuildTranslationTable(setup_top*16, setup_bottom*16);
@@ -1338,7 +1338,7 @@ void M_Setup_Key (int key)
 			setup_top = setup_top - 1;
 		if (setup_cursor == 3+offset)
 		{
-			if(!kurok)
+			if(!IS_KUROK)
 				setup_bottom = setup_bottom - 1;
 			else
 				setup_bottom = 4;
@@ -1368,7 +1368,7 @@ forward:
 			setup_top = setup_top + 1;
 		if (setup_cursor == 3+offset)
 		{
-			if(!kurok)
+			if(!IS_KUROK)
 				setup_bottom = setup_bottom + 1;
 			else
 				setup_bottom = 13;
@@ -1522,7 +1522,7 @@ void M_Net_Draw (void)
 	int		f;
 	qpic_t	*p,*b;
 
-	if (!kurok)
+	if (!IS_KUROK)
 	{
 		M_DrawTransPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp") );
     }
@@ -1802,7 +1802,7 @@ void M_AdjustSliders (int dir)
 	{
 		case OPT_SUBMENU:
 	        m_submenu += dir;
-	        if (kurok)
+	        if (IS_KUROK)
 	        {
 	            if (m_submenu > KNUM_SUBMENU-1)
 	        	    m_submenu = 0;
@@ -1890,7 +1890,7 @@ void M_AdjustSliders (int dir)
 				break;
 
 			case OPT_ALWAYRUN:	// always run
-	            if (kurok)
+	            if (IS_KUROK)
 	            {
 		            if (cl_forwardspeed.value > 150)
 	                {
@@ -2125,7 +2125,7 @@ void M_Options_Draw (void)
 	qpic_t	*p,*b;
 	int offset = 32;
 
-	if (kurok)
+	if (IS_KUROK)
 	{
         offset = 64;
 	    p = Draw_CachePic ("gfx/menu/option_0.lmp");
@@ -2203,7 +2203,7 @@ void M_Options_Draw (void)
 			M_DrawCheckbox (220, offset+(OPT_MOUSESTRAFE*8), in_analog_strafe.value );
 
         	M_Print (16, offset+(OPT_ALWAYRUN*8),        "            Always Run");
-        	if (kurok)
+        	if (IS_KUROK)
 	            M_DrawCheckbox (220, offset+(OPT_ALWAYRUN*8), cl_forwardspeed.value > 150);
             else
 	            M_DrawCheckbox (220, offset+(OPT_ALWAYRUN*8), cl_forwardspeed.value > 200);
@@ -2652,7 +2652,7 @@ void M_Keys_Draw (void)
 #endif
 
 // search for known bindings
-    if (kurok)
+    if (IS_KUROK)
     {
 	    if (bind_grab)
 		    M_DrawCharacter (170, 48 + keys_cursor*8, '?');
@@ -2737,7 +2737,7 @@ void M_Keys_Key (int key)
 		}
 		else if (key != '`')
 		{
-            if (kurok)
+            if (IS_KUROK)
 			    snprintf(cmd, sizeof(cmd),  "bind \"%s\" \"%s\"\n", Key_KeynumToString (key), kbindnames[keys_cursor][0]);
 			else
 			    snprintf(cmd, sizeof(cmd),  "bind \"%s\" \"%s\"\n", Key_KeynumToString (key), bindnames[keys_cursor][0]);
@@ -2760,7 +2760,7 @@ void M_Keys_Key (int key)
 		keys_cursor--;
 		if (keys_cursor < 0)
 		{
-		    if (kurok)
+		    if (IS_KUROK)
 			    keys_cursor = KNUMCOMMANDS-1;
 			else
 			    keys_cursor = NUMCOMMANDS-1;
@@ -2771,7 +2771,7 @@ void M_Keys_Key (int key)
 	case K_RIGHTARROW:
 		S_LocalSound ("misc/menu1.wav");
 		keys_cursor++;
-		if (kurok)
+		if (IS_KUROK)
 		{
 		    if (keys_cursor >= KNUMCOMMANDS)
 			    keys_cursor = 0;
@@ -2784,14 +2784,14 @@ void M_Keys_Key (int key)
 		break;
 
 	case K_ENTER:		// go into bind mode
-	    if (kurok)
+	    if (IS_KUROK)
 		    M_FindKeysForCommand (kbindnames[keys_cursor][0], keys);
 	    else
 	        M_FindKeysForCommand (bindnames[keys_cursor][0], keys);
 		S_LocalSound ("misc/menu2.wav");
 		if (keys[1] != -1)
 		{
-		    if (kurok)
+		    if (IS_KUROK)
 			    M_UnbindCommand (kbindnames[keys_cursor][0]);
 		    else
 		        M_UnbindCommand (bindnames[keys_cursor][0]);
@@ -2802,7 +2802,7 @@ void M_Keys_Key (int key)
 	case K_BACKSPACE:		// delete bindings
 	case K_DEL:				// delete bindings
 		S_LocalSound ("misc/menu2.wav");
-		if (kurok)
+		if (IS_KUROK)
 		    M_UnbindCommand (kbindnames[keys_cursor][0]);
         else
 		    M_UnbindCommand (bindnames[keys_cursor][0]);
@@ -2852,7 +2852,7 @@ void M_Menu_Help_f (void)
 
 void M_Help_Draw (void)
 {
-	if (kurok)
+	if (IS_KUROK)
 	    M_DrawPic (vid.width - 560, 0, Draw_CachePic ( va("gfx/menu/hp/help%i.lmp", help_page)) );
     else
         M_DrawPic (0, 0, Draw_CachePic ( va("gfx/help%i.lmp", help_page)) );
@@ -2870,7 +2870,7 @@ void M_Help_Key (int key)
 	case K_UPARROW:
 	case K_RIGHTARROW:
 		m_entersound = true;
-		if (!kurok)
+		if (!IS_KUROK)
 		{
 			if (++help_page >= NUM_HELP_PAGES)
 				help_page = 0;
@@ -2885,7 +2885,7 @@ void M_Help_Key (int key)
 	case K_DOWNARROW:
 	case K_LEFTARROW:
 		m_entersound = true;
-		if (!kurok)
+		if (!IS_KUROK)
 		{
 			if (--help_page < 0)
 				help_page = NUM_HELP_PAGES-1;
@@ -3346,7 +3346,7 @@ void M_SerialConfig_Draw (void)
 	char	*startJoin;
 	char	*directModem;
 
-	if (!kurok)
+	if (!IS_KUROK)
 	    M_DrawTransPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp") );
 
 	p = Draw_CachePic ("gfx/p_multi.lmp");
@@ -3627,7 +3627,7 @@ void M_ModemConfig_Draw (void)
 	qpic_t	*p,*b;
 	int		basex;
 
-	if (!kurok)
+	if (!IS_KUROK)
 		M_DrawTransPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp") );
 
 	p = Draw_CachePic ("gfx/p_multi.lmp");
@@ -3815,7 +3815,7 @@ void M_LanConfig_Draw (void)
 	char	*startJoin;
 	char	*protocol;
 
-	if (!kurok)
+	if (!IS_KUROK)
 	    M_DrawTransPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp") );
 
 	p = Draw_CachePic ("gfx/p_multi.lmp");
@@ -3859,7 +3859,7 @@ void M_LanConfig_Draw (void)
 	if (*m_return_reason)
 		M_PrintWhite (basex, 148, m_return_reason);
 
-	if (kurok)
+	if (IS_KUROK)
 	{
 	    M_DrawCharacter (basex-8, lanConfig_cursor_table [lanConfig_cursor], 12+((int)(realtime*30)&1));
 
@@ -3968,7 +3968,7 @@ void M_LanConfig_Key (int key)
             safe_spawn =
             no_bots = 0;
 
-            if(kurok)
+            if(IS_KUROK)
                 Cbuf_AddText ("viewsize 120\n cl_gunpitch 0\n fov 90\n scr_ofsy 0\n cl_autoaim 1\n chase_active 0\n");
 
             Cbuf_AddText ( va ("connect \"%s\"\n", lanConfig_joinname) );
@@ -4237,7 +4237,7 @@ void M_GameOptions_Draw (void)
 	int		x;
 //	int		r;
 
-	if (kurok)
+	if (IS_KUROK)
         // line cursor
 	    M_DrawCharacter (144, gameoptions_cursor_tablek[gameoptions_cursor], 12+((int)(realtime*30)&1));
 	else
@@ -4263,7 +4263,7 @@ void M_GameOptions_Draw (void)
 		M_Print (160, 64, "Deathmatch");
 
 	M_PrintWhite (0, 72, "        Teamplay");
-	if (rogue)
+	if (IS_ROGUE)
 	{
 		char *msg;
 
@@ -4301,7 +4301,7 @@ void M_GameOptions_Draw (void)
 		M_Print (160, 80, "Hard difficulty");
 	else
     {
-        if (kurok)
+        if (IS_KUROK)
             M_Print (160, 80, "Insane difficulty");
         else
             M_Print (160, 80, "Nightmare difficulty");
@@ -4325,7 +4325,7 @@ void M_GameOptions_Draw (void)
 	else
 		M_Print (160, 112, "On");
 
-    if(kurok)
+    if(IS_KUROK)
     {
         M_DrawTextBox (152, 120, 18, 1);
         M_PrintWhite (160, 128, "Deathmatch Options");
@@ -4333,30 +4333,30 @@ void M_GameOptions_Draw (void)
 
 	M_PrintWhite (0, 144, "         Episode");
    //MED 01/06/97 added hipnotic episodes
-   if (hipnotic)
+   if (IS_HIPNOTIC)
       M_Print (160, 144, hipnoticepisodes[startepisode].description);
    //PGM 01/07/97 added rogue episodes
-   else if (rogue)
+   else if (IS_ROGUE)
       M_Print (160, 144, rogueepisodes[startepisode].description);
-   else if (kurok)
+   else if (IS_KUROK)
       M_Print (160, 144, kurokepisodes[startepisode].description);
    else
       M_Print (160, 144, episodes[startepisode].description);
 
 	M_PrintWhite (0, 152, "           Level");
    //MED 01/06/97 added hipnotic episodes
-   if (hipnotic)
+   if (IS_HIPNOTIC)
    {
       M_Print (160, 152, hipnoticlevels[hipnoticepisodes[startepisode].firstLevel + startlevel].description);
       M_Print (160, 160, hipnoticlevels[hipnoticepisodes[startepisode].firstLevel + startlevel].name);
    }
    //PGM 01/07/97 added rogue episodes
-   else if (rogue)
+   else if (IS_ROGUE)
    {
       M_Print (160, 152, roguelevels[rogueepisodes[startepisode].firstLevel + startlevel].description);
       M_Print (160, 160, roguelevels[rogueepisodes[startepisode].firstLevel + startlevel].name);
    }
-   else if (kurok)
+   else if (IS_KUROK)
    {
       M_Print (160, 152, kuroklevels[kurokepisodes[startepisode].firstLevel + startlevel].description);
       M_Print (160, 160, kuroklevels[kurokepisodes[startepisode].firstLevel + startlevel].name);
@@ -4410,7 +4410,7 @@ void M_NetStart_Change (int dir)
 		break;
 
 	case 3:
-		if (rogue)
+		if (IS_ROGUE)
 			count = 6;
 		else
 			count = 2;
@@ -4451,18 +4451,18 @@ void M_NetStart_Change (int dir)
 		break;
 
 	case 9:
-		if (kurok)
+		if (IS_KUROK)
 			break;
 
 		startepisode += dir;
 	//MED 01/06/97 added hipnotic count
-		if (hipnotic)
+		if (IS_HIPNOTIC)
 			count = 6;
 	//PGM 01/07/97 added rogue count
 	//PGM 03/02/97 added 1 for dmatch episode
-		else if (rogue)
+		else if (IS_ROGUE)
 			count = 4;
-		else if (kurok)
+		else if (IS_KUROK)
 			count = 3;
 		else if (registered.value)
 			count = 7;
@@ -4479,17 +4479,17 @@ void M_NetStart_Change (int dir)
 		break;
 
 	case 10:
-		if (kurok)
+		if (IS_KUROK)
 		{
 			startepisode += dir;
 		//MED 01/06/97 added hipnotic count
-			if (hipnotic)
+			if (IS_HIPNOTIC)
 				count = 6;
 		//PGM 01/07/97 added rogue count
 		//PGM 03/02/97 added 1 for dmatch episode
-			else if (rogue)
+			else if (IS_ROGUE)
 				count = 4;
-			else if (kurok)
+			else if (IS_KUROK)
 				count = 3;
 			else if (registered.value)
 				count = 7;
@@ -4509,12 +4509,12 @@ void M_NetStart_Change (int dir)
 		{
 			startlevel += dir;
 		//MED 01/06/97 added hipnotic episodes
-			if (hipnotic)
+			if (IS_HIPNOTIC)
 				count = hipnoticepisodes[startepisode].levels;
 		//PGM 01/06/97 added hipnotic episodes
-			else if (rogue)
+			else if (IS_ROGUE)
 				count = rogueepisodes[startepisode].levels;
-			else if (kurok)
+			else if (IS_KUROK)
 				count = kurokepisodes[startepisode].levels;
 			else
 				count = episodes[startepisode].levels;
@@ -4529,12 +4529,12 @@ void M_NetStart_Change (int dir)
 	case 11:
 		startlevel += dir;
 	//MED 01/06/97 added hipnotic episodes
-		if (hipnotic)
+		if (IS_HIPNOTIC)
 			count = hipnoticepisodes[startepisode].levels;
 	//PGM 01/06/97 added hipnotic episodes
-		else if (rogue)
+		else if (IS_ROGUE)
 			count = rogueepisodes[startepisode].levels;
-		else if (kurok)
+		else if (IS_KUROK)
 			count = kurokepisodes[startepisode].levels;
 		else
 			count = episodes[startepisode].levels;
@@ -4560,7 +4560,7 @@ void M_GameOptions_Key (int key)
 	case K_UPARROW:
 		S_LocalSound ("misc/menu1.wav");
 		gameoptions_cursor--;
-		if (kurok)
+		if (IS_KUROK)
 		{
             if (gameoptions_cursor < 0)
                 gameoptions_cursor = NUM_KGAMEOPTIONS-1;
@@ -4575,7 +4575,7 @@ void M_GameOptions_Key (int key)
 	case K_DOWNARROW:
 		S_LocalSound ("misc/menu1.wav");
 		gameoptions_cursor++;
-		if (kurok)
+		if (IS_KUROK)
 		{
             if (gameoptions_cursor >= NUM_KGAMEOPTIONS)
                 gameoptions_cursor = 0;
@@ -4588,7 +4588,7 @@ void M_GameOptions_Key (int key)
 		break;
 
 	case K_LEFTARROW:
-		if (kurok)
+		if (IS_KUROK)
 		{
 			if (gameoptions_cursor == (0 || 9))
 			break;
@@ -4603,7 +4603,7 @@ void M_GameOptions_Key (int key)
 		break;
 
 	case K_RIGHTARROW:
-		if (kurok)
+		if (IS_KUROK)
 		{
 			if (gameoptions_cursor == (0 || 9))
 			break;
@@ -4627,14 +4627,14 @@ void M_GameOptions_Key (int key)
 			Cbuf_AddText ( va ("maxplayers %u\n", maxplayers) );
 			SCR_BeginLoadingPlaque ();
 
-            if(kurok)
+            if(IS_KUROK)
                 Cbuf_AddText ("viewsize 120\n cl_gunpitch 0\n fov 90\n scr_ofsy 0\n cl_autoaim 1\n chase_active 0\n");
 
-			if (hipnotic)
+			if (IS_HIPNOTIC)
 				Cbuf_AddText ( va ("map %s\n", hipnoticlevels[hipnoticepisodes[startepisode].firstLevel + startlevel].name) );
-			else if (rogue)
+			else if (IS_ROGUE)
 				Cbuf_AddText ( va ("map %s\n", roguelevels[rogueepisodes[startepisode].firstLevel + startlevel].name) );
-			else if (kurok)
+			else if (IS_KUROK)
 				Cbuf_AddText ( va ("map %s\n", kuroklevels[kurokepisodes[startepisode].firstLevel + startlevel].name) );
 			else
 				Cbuf_AddText ( va ("map %s\n", levels[episodes[startepisode].firstLevel + startlevel].name) );
@@ -4642,7 +4642,7 @@ void M_GameOptions_Key (int key)
 			return;
 		}
 
-		if (kurok)
+		if (IS_KUROK)
 		{
 			if (gameoptions_cursor == 9)
 			{
@@ -5287,7 +5287,7 @@ void M_DOptions_Draw (void)
 	qpic_t	*p;
 	int		x;
 
-	if(!kurok)
+	if(!IS_KUROK)
 		M_DrawTransPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp") );
 	p = Draw_CachePic ("gfx/p_multi.lmp");
 	M_DrawPic ( (320-p->width)/2, 4, p);
@@ -5470,7 +5470,7 @@ void M_Search_Draw (void)
 		return;
 	}
 
-    if (kurok)
+    if (IS_KUROK)
     {
 		M_PrintWhite ((320/2) - ((22*8)/2), 64, "No Kurok servers found");
 		if ((realtime - searchCompleteTime) < 3.0)
@@ -5534,7 +5534,7 @@ void M_ServerList_Draw (void)
 		slist_sorted = true;
 	}
 
-    if(kurok)
+    if(IS_KUROK)
         M_DrawCharacter (0, 32 + slist_cursor*8, 12+((int)(realtime*30)&1));
     else
         M_DrawCharacter (0, 32 + slist_cursor*8, 12+((int)(realtime*4)&1));
@@ -5611,7 +5611,7 @@ void M_ServerList_Key (int key)
 			safe_spawn =
 			no_bots = 0;
 
-		if(kurok)
+		if(IS_KUROK)
 			Cbuf_AddText ("viewsize 120\n cl_gunpitch 0\n fov 90\n scr_ofsy 0\n cl_autoaim 1\n chase_active 0\n");
 
 		Cbuf_AddText ( va ("connect \"%s\"\n", hostcache[slist_cursor].cname) );
@@ -5664,7 +5664,7 @@ void M_Draw (void)
 		else
 		{
 #ifdef SUPPORTS_KUROK
-            if (kurok)
+            if (IS_KUROK)
                 Draw_FadeScreen2 ();
             else
 #endif

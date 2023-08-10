@@ -177,7 +177,7 @@ void CDAudio_Play(byte track, qboolean looping)
 	snprintf(path, sizeof(path), "%s/music/track%02u.mp3", com_gamedir, track);
 	}
 	else {
-	snprintf(path, sizeof(path), "%s/%s/music/track%02u.mp3", host_parms.basedir, kurok ? "kurok" : "id1", track);
+	snprintf(path, sizeof(path), "%s/%s/music/track%02u.mp3", host_parms.basedir, IS_KUROK ? "kurok" : "id1", track);
 	}
 	
 

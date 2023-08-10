@@ -1697,7 +1697,7 @@ void Host_Give_f (void)
    case '9':
 
       // MED 01/04/97 added hipnotic give stuff
-      if (hipnotic)
+      if (IS_HIPNOTIC)
       {
          if (t[0] == '6')
          {
@@ -1721,7 +1721,7 @@ void Host_Give_f (void)
 		break;
 
     case 's':
-		if (rogue)
+		if (IS_ROGUE)
 		{
 		    if ((val = GETEDICTFIELDVALUE(sv_player, eval_ammo_shells1)))
 			    val->_float = v;
@@ -1731,7 +1731,7 @@ void Host_Give_f (void)
         break;
 
     case 'n':
-		if (rogue)
+		if (IS_ROGUE)
 		{
 			if ((val = GETEDICTFIELDVALUE(sv_player, eval_ammo_nails1)))
 			{
@@ -1747,7 +1747,7 @@ void Host_Give_f (void)
         break;
 
     case 'l':
-		if (rogue)
+		if (IS_ROGUE)
 		{
 			if ((val = GETEDICTFIELDVALUE(sv_player, eval_ammo_lava_nails)))
 			{
@@ -1759,7 +1759,7 @@ void Host_Give_f (void)
         break;
 
     case 'r':
-		if (rogue)
+		if (IS_ROGUE)
 		{
 			if ((val = GETEDICTFIELDVALUE(sv_player, eval_ammo_rockets1)))
 			{
@@ -1775,7 +1775,7 @@ void Host_Give_f (void)
         break;
 
     case 'm':
-		if (rogue)
+		if (IS_ROGUE)
 		{
 			if ((val = GETEDICTFIELDVALUE(sv_player, eval_ammo_multi_rockets)))
 			{
@@ -1791,7 +1791,7 @@ void Host_Give_f (void)
         break;
 
     case 'c':
-		if (rogue)
+		if (IS_ROGUE)
 		{
 			if ((val = GETEDICTFIELDVALUE(sv_player, eval_ammo_cells1)))
 			{
@@ -1807,7 +1807,7 @@ void Host_Give_f (void)
         break;
 
     case 'p':
-		if (rogue)
+		if (IS_ROGUE)
 		{
 			if ((val = GETEDICTFIELDVALUE(sv_player, eval_ammo_plasma)))
 			{

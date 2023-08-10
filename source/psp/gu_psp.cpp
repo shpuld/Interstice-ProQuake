@@ -362,7 +362,7 @@ void D_StartParticles (void)
 		//sceGuDisable(GU_FOG);
 		sceGuTexFunc(GU_TFX_MODULATE , GU_TCC_RGBA);
 
-		if (kurok)
+		if (IS_KUROK)
 			sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_FIX, 0, 0xFFFFFFFF);
 		else
 			sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
@@ -502,7 +502,7 @@ void SCR_ScreenShot_f (void)
 //
 // find a file name to save it to
 //
-    if (kurok)
+    if (IS_KUROK)
 	    strcpy(pcxname,"sshot00.tga");
     else
         strcpy(pcxname,"quake00.tga");

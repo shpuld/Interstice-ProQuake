@@ -505,16 +505,7 @@ if (bits&(1<<i))
 
 	if (bits & U_MODEL)
 	{
-
-#ifdef SUPPORTS_KUROK_PROTOCOL
-
-		modnum = MSG_ReadShort ();
-
-#else
-
 		modnum = MSG_ReadByte ();
-
-#endif // SUPPORTS_KUROK_PROTOCOL
 
 		if (modnum >= MAX_MODELS)
 			Host_Error ("CL_ParseUpdate: bad modelindex");
@@ -621,6 +612,7 @@ if (bits&(1<<i))
 		ent->msg_angles[0][2] = MSG_ReadAngle();
 	else
 		ent->msg_angles[0][2] = ent->baseline.angles[2];
+
 #ifdef SUPPORTS_KUROK_PROTOCOL
 // Tomaz - QC Alpha Scale Glow Begin
 
@@ -690,16 +682,7 @@ static void CL_ParseBaseline (entity_t *ent)
 	int			i;
 //	Con_Printf("cl_parse.c baseline start\n");
 
-#ifdef SUPPORTS_KUROK_PROTOCOL
-
-	ent->baseline.modelindex = MSG_ReadShort ();
-
-#else
-
 	ent->baseline.modelindex = MSG_ReadByte ();
-
-#endif // SUPPORTS_KUROK_PROTOCOL
-
 	ent->baseline.frame = MSG_ReadByte ();
 	ent->baseline.colormap = MSG_ReadByte();
 	ent->baseline.skin = MSG_ReadByte();
@@ -817,7 +800,7 @@ static void CL_ParseClientdata (int bits)
 
 	i = MSG_ReadByte ();
 
-	if (standard_quake)
+	if (IS_QUAKE)
 	{
 		if (cl.stats[STAT_ACTIVEWEAPON] != i)
 		{
@@ -1218,6 +1201,7 @@ CL_ParseProQuakeString
 CL_ParseServerMessage
 =====================
 */
+int last_message;
 void CL_ParseServerMessage (void)
 {
 	int			cmd, i;
@@ -1239,6 +1223,8 @@ void CL_ParseServerMessage (void)
 			Host_Error ("CL_ParseServerMessage: Bad server message");
 
 		cmd = MSG_ReadByte ();
+
+		if (cmd != svc_version) last_message = cmd;
 
 		if (cmd == -1)
 		{

@@ -122,7 +122,7 @@ float V_CalcRoll (vec3_t angles, vec3_t velocity)
 	side = fabsf(side);
 
 #ifdef SUPPORTS_KUROK
-	if (kurok)
+	if (IS_KUROK)
 	{
 		value = cl_rollangle.value;
 		if (cl.inwater)
@@ -423,7 +423,7 @@ void V_ParseDamage (void)
 	if (armor > blood)
 	{
 #ifdef SUPPORTS_KUROK
-	    if (kurok) // Flash blue for damage when wearing armor
+	    if (IS_KUROK) // Flash blue for damage when wearing armor
 	    {
             cl.cshifts[CSHIFT_DAMAGE].destcolor[0] = 100;   //r
             cl.cshifts[CSHIFT_DAMAGE].destcolor[1] = 100;   //g
@@ -440,7 +440,7 @@ void V_ParseDamage (void)
 	else if (armor)
 	{
 #ifdef SUPPORTS_KUROK
-	    if (kurok) // Flash blue for damage when wearing armor
+	    if (IS_KUROK) // Flash blue for damage when wearing armor
 	    {
             cl.cshifts[CSHIFT_DAMAGE].destcolor[0] = 0;     //r
             cl.cshifts[CSHIFT_DAMAGE].destcolor[1] = 0;     //g
@@ -502,7 +502,7 @@ When you run over an item, the server sends this command
 static void V_BonusFlash_f (void)
 {
 #ifdef SUPPORTS_KUROK
-	    if (kurok) // Flash blue for damage when wearing armor
+	    if (IS_KUROK) // Flash blue for damage when wearing armor
 	    {	
 			cl.cshifts[CSHIFT_BONUS].destcolor[0] = 128;
 			cl.cshifts[CSHIFT_BONUS].destcolor[1] = 128;
@@ -541,7 +541,7 @@ void V_SetContentsColor (int contents)
 		break;
 	default:
 #ifdef SUPPORTS_KUROK
-	if (kurok)
+	if (IS_KUROK)
 		cl.cshifts[CSHIFT_CONTENTS] = cshift_kwater;
     else
 #endif
@@ -935,7 +935,7 @@ void CalcGunAngle (void)
 
 	extern cvar_t scr_fov;
 
-    if (kurok && scr_fov.value == 90)
+    if (IS_KUROK && scr_fov.value == 90)
     {
         cl.viewent.angles[ROLL] -= sin(cl.time*3);
         if (!in_disable_analog.value)
@@ -1055,7 +1055,7 @@ void V_CalcIntermissionRefdef (void)
 
 // always idle in intermission
 #ifdef SUPPORTS_KUROK
-    if (!kurok)
+    if (!IS_KUROK)
 #endif
     {
 	    old = v_idlescale.value;
@@ -1156,7 +1156,7 @@ void V_CalcRefdef (void)
     view->origin[2] += bob;
 
 #ifdef SUPPORTS_KUROK
-    if(!kurok)
+    if(!IS_KUROK)
 #endif
     {
 	
@@ -1255,7 +1255,7 @@ void V_RenderView (void)
 	R_LessenStains();  //qbism ftestain
 #endif
 #ifdef SUPPORTS_KUROK
-    if (!kurok)
+    if (!IS_KUROK)
 #endif
     {
 		// don't allow cheats in multiplayer

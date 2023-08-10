@@ -52,10 +52,7 @@ char	**com_argv;
 #define CMDLINE_LENGTH	256
 static char	com_cmdline[CMDLINE_LENGTH];
 
-qboolean		standard_quake = true, rogue, hipnotic;
-#ifdef SUPPORTS_KUROK
-qboolean		kurok;
-#endif
+int compat_gametype;
 
 /*
 
@@ -885,7 +882,7 @@ void COM_CheckRegistered (void)
 	int                     i;
 
 #ifdef SUPPORTS_KUROK
-	if (kurok)
+	if (IS_KUROK)
 	{
 		Cvar_SetStringByRef (&cmdline, com_cmdline);
 		Cvar_SetValueByRef (&registered, 1);
@@ -979,26 +976,6 @@ void COM_InitArgv (int argc, char **argv)
 
 	largv[com_argc] = argvdummy;
 	com_argv = largv;
-
-	if (COM_CheckParm ("-rogue"))
-	{
-		rogue = true;
-		standard_quake = false;
-	}
-
-	if (COM_CheckParm("-hipnotic") || COM_CheckParm ("-quoth"))
-	{
-		hipnotic = true;
-		standard_quake = false;
-	}
-
-#ifdef SUPPORTS_KUROK
-	if (COM_CheckParm ("-kurok"))
-	{
-		kurok = true;
-		standard_quake = false;
-	}
-#endif
 
 	//ProQuake 4.10 new extras
 
@@ -1601,7 +1578,6 @@ void COM_AddGameDirectory (char *dir)
 		pak = COM_LoadPackFile (pakfile);
 
 // Don't stop if a pak is missing when running Kurok.
-//        if (!kurok)
             if (!pak)
                 break;
 
@@ -1667,16 +1643,8 @@ void COM_InitFilesystem (void)
 // start up with GAMENAME by default (id1)
 	COM_AddGameDirectory (va("%s/"GAMENAME, basedir) );
 
-	if (COM_CheckParm ("-rogue"))
-		COM_AddGameDirectory (va("%s/rogue", basedir) );
-	if (COM_CheckParm ("-hipnotic"))
-		COM_AddGameDirectory (va("%s/hipnotic", basedir) );
 	if (COM_CheckParm ("-quoth"))
 		COM_AddGameDirectory ("quoth");
-#ifdef SUPPORTS_KUROK
-	if (COM_CheckParm ("-kurok"))
-		COM_AddGameDirectory (va("%s/kurok", basedir) );
-#endif
 
 #ifdef PROQUAKE_EXTENSION
 	com_verifypaths = com_searchpaths;	// JPG 3.20

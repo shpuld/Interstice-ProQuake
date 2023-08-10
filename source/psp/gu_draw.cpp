@@ -298,7 +298,7 @@ void Draw_Init (void)
 	SwapPic (cb);
 
 	// hack the version number directly into the pic
-	if(!kurok)
+	if(!IS_KUROK)
 	{
 	   	snprintf(ver, sizeof(ver),  "(ProQuake) %4.2f", PROQUAKE_SERIES_VERSION); // JPG - obvious change
 	   	dest = cb->data + 320*186 + 320 - 11 - 8*strlen(ver);

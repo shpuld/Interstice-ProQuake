@@ -214,7 +214,7 @@ void Sbar_LoadPics (void)
 	sb_scorebar = Draw_PicFromWad ("scorebar");
 
 //MED 01/04/97 added new hipnotic weapons
-	if (hipnotic)
+	if (IS_HIPNOTIC)
 	{
 	  hsb_weapons[0][0] = Draw_PicFromWad ("inv_laser");
 	  hsb_weapons[0][1] = Draw_PicFromWad ("inv_mjolnir");
@@ -241,7 +241,7 @@ void Sbar_LoadPics (void)
 	  hsb_items[1] = Draw_PicFromWad ("sb_eshld");
 	}
 
-	if (rogue)
+	if (IS_ROGUE)
 	{
 		rsb_invbar[0] = Draw_PicFromWad ("r_invbar1");
 		rsb_invbar[1] = Draw_PicFromWad ("r_invbar2");
@@ -264,7 +264,7 @@ void Sbar_LoadPics (void)
 		rsb_ammo[2] = Draw_PicFromWad ("r_ammoplasma");
 	}
 #ifdef SUPPORTS_KUROK
-	if (kurok)
+	if (IS_KUROK)
 	{
 		ksb_ammo[0] = Draw_PicFromWad ("sb_50cal");
 	}
@@ -303,7 +303,7 @@ Sbar_DrawPic
 void Sbar_DrawPic (int x, int y, qpic_t *pic)
 {
 #ifdef SUPPORTS_KUROK
-  if(kurok)
+  if(IS_KUROK)
   		Draw_Pic (x /* + ((vid.width - 320)>>1)*/, y + (vid.height-SBAR_HEIGHT), pic);
   else
 #endif
@@ -335,7 +335,7 @@ void Sbar_DrawAlphaPic (int x, int y, qpic_t *pic, float alpha)
 void Sbar_DrawTransPic (int x, int y, qpic_t *pic)
 {
 #ifdef SUPPORTS_KUROK
-  if(kurok)
+  if(IS_KUROK)
   		Draw_TransPic (x /*+ ((vid.width - 320)>>1)*/, y + (vid.height-SBAR_HEIGHT), pic);
   else
 #endif
@@ -357,7 +357,7 @@ Draws one solid graphics character
 void Sbar_DrawCharacter (int x, int y, int num)
 {
 #ifdef SUPPORTS_KUROK
-  if(kurok)
+  if(IS_KUROK)
 		Draw_Character ( x /*+ ((vid.width - 320)>>1) */ + 4 , y + vid.height-SBAR_HEIGHT, num);
   else
 #endif
@@ -377,7 +377,7 @@ Sbar_DrawString
 void Sbar_DrawString (int x, int y, char *str)
 {
 #ifdef SUPPORTS_KUROK
-  if(kurok)
+  if(IS_KUROK)
 		Draw_String (x /*+ ((vid.width - 320)>>1)*/, y + vid.height-SBAR_HEIGHT, str);
   else
 #endif
@@ -468,7 +468,7 @@ void Sbar_DrawNum (int x, int y, int num, int digits, int color)
     if (l < digits)
     {
 #ifdef SUPPORTS_KUROK
-        if (kurok)
+        if (IS_KUROK)
 	        x += (digits-l)*16;
         else
 #endif
@@ -482,7 +482,7 @@ void Sbar_DrawNum (int x, int y, int num, int digits, int color)
 		Sbar_DrawTransPic (x,y,sb_nums[color][frame]);
 
 #ifdef SUPPORTS_KUROK
-        if (kurok)
+        if (IS_KUROK)
 		    x += 16;
 		else
 #endif
@@ -643,7 +643,7 @@ void Sbar_SoloScoreboard (void)
 	int		len, minutes, seconds, tens, units;
 
 #ifdef SUPPORTS_KUROK
-	if(kurok)
+	if(IS_KUROK)
 		snprintf(str, sizeof(str), "Enemies :%3i /%3i", cl.stats[STAT_MONSTERS], cl.stats[STAT_TOTALMONSTERS]);
 	else
 #endif
@@ -651,7 +651,7 @@ void Sbar_SoloScoreboard (void)
 	Sbar_DrawString (8, 4, str);
 
 #ifdef SUPPORTS_KUROK
-	if(kurok)
+	if(IS_KUROK)
 		snprintf(str, sizeof(str), "Objectives :%3i /%3i", cl.stats[STAT_SECRETS], cl.stats[STAT_TOTALSECRETS]);
 	else
 #endif
@@ -710,7 +710,7 @@ void Sbar_DrawInventory (void)
 
 
 	{
-		if (rogue)
+		if (IS_ROGUE)
 		{
 			if ( cl.stats[STAT_ACTIVEWEAPON] >= RIT_LAVA_NAILGUN )
 #ifdef SUPPORTS_2DPICS_ALPHA
@@ -727,7 +727,7 @@ void Sbar_DrawInventory (void)
 
 
 		}
-		else if (!kurok)
+		else if (!IS_KUROK)
 		{
 
 	#ifdef SUPPORTS_2DPICS_ALPHA
@@ -739,7 +739,7 @@ void Sbar_DrawInventory (void)
 	}
 
 // weapons
-    if (!kurok)
+    if (!IS_KUROK)
     {
 		for (i=0 ; i<7 ; i++)
 		{
@@ -772,7 +772,7 @@ void Sbar_DrawInventory (void)
 
 // MED 01/04/97
 // hipnotic weapons
-    if (hipnotic)
+    if (IS_HIPNOTIC)
     {
       int grenadeflashing=0;
 
@@ -826,7 +826,7 @@ void Sbar_DrawInventory (void)
     }
 
 // rogue weapons
-	if (rogue)
+	if (IS_ROGUE)
 	{ // check for powered up weapon
 		if ( cl.stats[STAT_ACTIVEWEAPON] >= RIT_LAVA_NAILGUN )
 		{
@@ -838,7 +838,7 @@ void Sbar_DrawInventory (void)
 		}
 	}
 
-    if (!kurok)
+    if (!IS_KUROK)
     {
 // ammo counts
 		for (i=0 ; i<4 ; i++)
@@ -876,10 +876,10 @@ void Sbar_DrawInventory (void)
          }
          else
          { //MED 01/04/97 changed keys
-            if (!hipnotic || (i>1))
+            if (!IS_HIPNOTIC || (i>1))
 			{
 #ifdef SUPPORTS_KUROK
-				if(kurok)
+				if(IS_KUROK)
 					Sbar_DrawAlphaPic (80 + i*16, 0, sb_items[i], cl_sbar.value);
 				else
 #endif
@@ -893,7 +893,7 @@ void Sbar_DrawInventory (void)
 
    //MED 01/04/97 added hipnotic items
    // hipnotic items
-	if (hipnotic)  {
+	if (IS_HIPNOTIC)  {
 		for (i=0 ; i<2 ; i++) {
       		if (cl.items & (1<<(24+i))) {
             	time = cl.item_gettime[24+i];
@@ -909,7 +909,7 @@ void Sbar_DrawInventory (void)
 	}
 
 // rogue items
-	if (rogue)
+	if (IS_ROGUE)
 	{
 	// new rogue items
 		for (i=0 ; i<2 ; i++)
@@ -933,7 +933,7 @@ void Sbar_DrawInventory (void)
 		}
 	}
 
-	if (kurok)
+	if (IS_KUROK)
 	{
 
 	}
@@ -980,7 +980,7 @@ void Sbar_DrawFrags (void)
 
 	x = 23;
 
-    if (kurok)
+    if (IS_KUROK)
     {
 		xofs = 0;
     }
@@ -1041,7 +1041,7 @@ void Sbar_DrawFace (void)
 
 // PGM 01/19/97 - team color drawing
 // PGM 03/02/97 - fixed so color swatch only appears in CTF modes
-	if (rogue && (cl.maxclients != 1) && (teamplay.value>3) && (teamplay.value<7))
+	if (IS_ROGUE && (cl.maxclients != 1) && (teamplay.value>3) && (teamplay.value<7))
 	{
 		int				top, bottom, xofs;
 		char			num[12];
@@ -1055,7 +1055,7 @@ void Sbar_DrawFace (void)
 		bottom = Sbar_ColorForMap (bottom);
 
 #ifdef SUPPORTS_KUROK
-		if (kurok)
+		if (IS_KUROK)
 		{
 			xofs = 113;
         }
@@ -1096,12 +1096,12 @@ void Sbar_DrawFace (void)
 	}
 // PGM 01/19/97 - team color drawing
 
-    if (!kurok)
+    if (!IS_KUROK)
     {
 
 		if ( (cl.items & (IT_INVISIBILITY | IT_INVULNERABILITY) )== (IT_INVISIBILITY | IT_INVULNERABILITY) )
 		{
-	        if (kurok)
+	        if (IS_KUROK)
 			    Sbar_DrawPic (8, 0, sb_face_invis_invuln);
 			else
 			    Sbar_DrawPic (112, 0, sb_face_invis_invuln);
@@ -1109,7 +1109,7 @@ void Sbar_DrawFace (void)
 		}
 		if (cl.items & IT_QUAD)
 		{
-	        if (kurok)
+	        if (IS_KUROK)
 			    Sbar_DrawPic (8, 0, sb_face_quad );
 	        else
 			    Sbar_DrawPic (112, 0, sb_face_quad );
@@ -1117,7 +1117,7 @@ void Sbar_DrawFace (void)
 		}
 		if (cl.items & IT_INVISIBILITY)
 		{
-	        if (kurok)
+	        if (IS_KUROK)
 			    Sbar_DrawPic (8, 0, sb_face_invis );
 	        else
 			    Sbar_DrawPic (112, 0, sb_face_invis );
@@ -1125,7 +1125,7 @@ void Sbar_DrawFace (void)
 		}
 		if (cl.items & IT_INVULNERABILITY)
 		{
-	        if (kurok)
+	        if (IS_KUROK)
 			    Sbar_DrawPic (8, 0, sb_face_invuln);
 	        else
 			    Sbar_DrawPic (112, 0, sb_face_invuln);
@@ -1146,7 +1146,7 @@ void Sbar_DrawFace (void)
 		anim = 0;
 	}
 #ifdef SUPPORTS_KUROK
-    if (kurok)
+    if (IS_KUROK)
 	    Sbar_DrawPic (8, 0, sb_faces[f][anim]);
 	else
 #endif
@@ -1169,7 +1169,7 @@ void Sbar_Draw (void)
     if (scr_viewsize.value == 130)
         return;
 
-    if (!kurok && cl_sbar.value >= 1.0)
+    if (!IS_KUROK && cl_sbar.value >= 1.0)
     {
 	    if (sb_updates >= vid.numpages)
 		   return;
@@ -1178,10 +1178,10 @@ void Sbar_Draw (void)
 
 	sb_updates++;
 	if (scr_viewsize.value > 115){ //duke edition at request of grzybiars
-		if (!hipnotic && cl.items & IT_KEY1){
+		if (!IS_HIPNOTIC && cl.items & IT_KEY1){
 			Sbar_DrawPic (-12, 0, sb_items[0]);
 			}
-		if (!kurok && !rogue && !hipnotic && cl.items & IT_KEY2){
+		if (!IS_KUROK && !IS_ROGUE && !IS_HIPNOTIC && cl.items & IT_KEY2){
 			Sbar_DrawPic (-12, 8, sb_items[1]);
 			}
 	}
@@ -1192,7 +1192,7 @@ void Sbar_Draw (void)
 			Draw_TileClear (0, vid.height - sb_lines, vid.width, sb_lines);
 	}
 
-    if (kurok)
+    if (IS_KUROK)
     {
 	    if (scr_viewsize.value < 130)
 	    {
@@ -1238,7 +1238,7 @@ void Sbar_Draw (void)
 
 	if (sb_showscores || cl.stats[STAT_HEALTH] <= 0)
 	{
-		if(!kurok)
+		if(!IS_KUROK)
 			Sbar_DrawAlphaPic (0, 0, sb_scorebar, cl_sbar.value);
 		Sbar_DrawScoreboard ();
 		sb_updates = 0;
@@ -1247,7 +1247,7 @@ void Sbar_Draw (void)
 	else if (sb_lines >= 0)
 	{
 
-    if (!kurok)
+    if (!IS_KUROK)
     {
         if (sb_lines >= 24)
             Sbar_DrawAlphaPic (0, 0, sb_sbar, cl_sbar.value);
@@ -1255,7 +1255,7 @@ void Sbar_Draw (void)
 
    // keys (hipnotic only)
       //MED 01/04/97 moved keys here so they would not be overwritten
-      if (hipnotic)
+      if (IS_HIPNOTIC)
       {
          if (cl.items & IT_KEY1)
             Sbar_DrawPic (209, 3, sb_items[0]);
@@ -1271,7 +1271,7 @@ void Sbar_Draw (void)
 		}
 		else
 		{
-			if (rogue)
+			if (IS_ROGUE)
 			{
 				Sbar_DrawNum (24, 0, cl.stats[STAT_ARMOR], 3, cl.stats[STAT_ARMOR] <= 25);
 				if (cl.items & RIT_ARMOR3)
@@ -1282,7 +1282,7 @@ void Sbar_Draw (void)
 					Sbar_DrawPic (0, 0, sb_armor[0]);
 			}
 #ifdef SUPPORTS_KUROK
-			else if (kurok)
+			else if (IS_KUROK)
 			{
 				if (cl.items & KIT_ARMOR3)
 					Sbar_DrawPic (8, -16, sb_armor[2]);
@@ -1308,7 +1308,7 @@ void Sbar_Draw (void)
 		Sbar_DrawFace ();
 
 	// ammo icon
-		if (rogue)
+		if (IS_ROGUE)
 		{
 			if (cl.items & RIT_SHELLS)
 				Sbar_DrawPic (224, 0, sb_ammo[0]);
@@ -1326,7 +1326,7 @@ void Sbar_Draw (void)
 				Sbar_DrawPic (224, 0, rsb_ammo[2]);
 		}
 #ifdef SUPPORTS_KUROK
-		else if (kurok)
+		else if (IS_KUROK)
 		{
             if (!cl_gunpitch.value)
             {
@@ -1361,7 +1361,7 @@ void Sbar_Draw (void)
         {}
         else
         {
-            if (kurok)
+            if (IS_KUROK)
                 Sbar_DrawNum2 (24, -16, cl.stats[STAT_ARMOR], 3, cl.stats[STAT_ARMOR] <= 25);
             else
                 Sbar_DrawNum (24, 0, cl.stats[STAT_ARMOR], 3, cl.stats[STAT_ARMOR] <= 25);
@@ -1371,7 +1371,7 @@ void Sbar_Draw (void)
         {}
         else
         {
-             if (kurok)
+             if (IS_KUROK)
              {
              //   if (cl.stats[STAT_ARMOR] >= 1)
              //   {}
@@ -1382,7 +1382,7 @@ void Sbar_Draw (void)
              	Sbar_DrawNum (136, 0, cl.stats[STAT_HEALTH], 3, cl.stats[STAT_HEALTH] <= 25);
         }
 
-        if (kurok)
+        if (IS_KUROK)
         {
             if (!cl_gunpitch.value)
             {

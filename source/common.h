@@ -281,11 +281,6 @@ char *COM_Quakebar (int len);
 
 extern	struct cvar_s	registered;
 
-extern qboolean		standard_quake, rogue, hipnotic;
-
-#ifdef SUPPORTS_KUROK
-extern qboolean		kurok;
-#endif
 extern qboolean		mod_deeplair, mod_conhide,  mod_nosoundwarn;
 
 extern void COM_ToLowerString(char *in, char *out);

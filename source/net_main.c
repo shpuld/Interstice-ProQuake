@@ -345,7 +345,7 @@ void NET_Slist_f (void)
 	if (! slistSilent)
 	{
 #ifdef SUPPORTS_KUROK
-        if (kurok)
+        if (IS_KUROK)
 		    Con_Printf("Looking for Kurok servers...\n");
 		else
 #endif

@@ -1577,16 +1577,7 @@ void PF_makestatic (void)
 	ent = G_EDICT(OFS_PARM0);
 
 	MSG_WriteByte (&sv.signon,svc_spawnstatic);
-
-#ifdef SUPPORTS_KUROK_PROTOCOL
-
-	MSG_WriteShort (&sv.signon, SV_ModelIndex(pr_strings + ent->v.model));
-
-#else
-
 	MSG_WriteByte (&sv.signon, SV_ModelIndex(pr_strings + ent->v.model));
-
-#endif // SUPPORTS_KUROK_PROTOCOL
 
 	MSG_WriteByte (&sv.signon, ent->v.frame);
 	MSG_WriteByte (&sv.signon, ent->v.colormap);

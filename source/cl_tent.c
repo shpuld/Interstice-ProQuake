@@ -198,7 +198,7 @@ void CL_ParseTEnt (void)
 		pos[1] = MSG_ReadCoord ();
 		pos[2] = MSG_ReadCoord ();
 #ifdef SUPPORTS_KUROK
-		if (!kurok)
+		if (!IS_KUROK)
 #endif
 		{
 			R_RunParticleEffect (pos, vec3_origin, 0, 20);
@@ -219,7 +219,7 @@ void CL_ParseTEnt (void)
 		dl->die = cl.time + 0.5;
 		dl->decay = 300;
 #ifdef SUPPORTS_KUROK
-		if(kurok)
+		if(IS_KUROK)
 		{
         	dl->color[0] = MSG_ReadCoord ();
 			dl->color[1] = MSG_ReadCoord ();
@@ -238,7 +238,7 @@ void CL_ParseTEnt (void)
 		pos[2] = MSG_ReadCoord ();
 		R_BlobExplosion (pos);
 #ifdef SUPPORTS_KUROK
-		if(kurok)
+		if(IS_KUROK)
 		{
 			dl = CL_AllocDlight (0);
 			VectorCopy (pos, dl->origin);

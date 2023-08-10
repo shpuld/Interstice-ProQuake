@@ -931,7 +931,7 @@ void SCR_UpdateScreen (void)
 		if (mod_conhide==false || (key_dest == key_console || key_dest == key_message))
 			SCR_DrawConsole ();
 
-		if (kurok)
+		if (IS_KUROK)
 			if(scr_loadscreen.value)
             	SCR_DrawLoadScreen();
 

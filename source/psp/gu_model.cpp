@@ -620,7 +620,7 @@ void Mod_LoadLighting (lump_t *l)
 		memcpy_vfpu(loadmodel->lightdata, mod_base + l->fileofs, l->filelen);
 		return;
 	}
-    else if(kurok)
+    else if(IS_KUROK)
     {
         LIGHTMAP_BYTES = 4;
         MAX_LIGHTMAPS = 16;
@@ -932,7 +932,7 @@ void CalcSurfaceExtents (msurface_t *s)
 	}
 
 #ifdef SUPPORTS_KUROK
-    if (kurok)
+    if (IS_KUROK)
     {
         for (i=0 ; i<2 ; i++)
         {
@@ -1026,7 +1026,7 @@ void Mod_LoadFaces (lump_t *l)
 		{
 			out->flags |= (SURF_DRAWSKY | SURF_DRAWTILED);
 #ifdef SUPPORTS_KUROK
-            if(kurok)
+            if(IS_KUROK)
                 GL_Surface (out);	// Don't cut up polygon for warps
             else
 #endif
@@ -1185,7 +1185,7 @@ void Mod_LoadClipnodes (lump_t *l)
 	loadmodel->numclipnodes = count;
 
 
-	if (kurok || loadmodel->bspversion == HL_BSPVERSION)
+	if (IS_KUROK || loadmodel->bspversion == HL_BSPVERSION)
 	{
 		hull = &loadmodel->hulls[1];
 		hull->clipnodes = out;

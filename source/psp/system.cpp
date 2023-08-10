@@ -135,7 +135,7 @@ namespace quake
 			}
 
             Con_Printf("CD Audio Initialized\n");
-            if(kurok)
+            if(IS_KUROK)
             {
                 Cvar_SetStringByRef (&bgmtype, "cd");
                 CDAudio_Update();

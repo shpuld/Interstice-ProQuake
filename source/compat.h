@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define COMPAT_HIPNOTIC     1   // Scourge of Armagon
 #define COMPAT_ROGUE        2   // Dissolution of Eternity
 #define COMPAT_KUROK        3   // Kurok (untested)
+#define COMPAT_SUPERHOT     4   // SUPERHOT Quake
 
 extern int compat_gametype;
 
@@ -34,5 +35,6 @@ extern int compat_gametype;
 #define IS_HIPNOTIC ((compat_gametype) == (COMPAT_HIPNOTIC))
 #define IS_ROGUE    ((compat_gametype) == (COMPAT_ROGUE))
 #define IS_KUROK    ((compat_gametype) == (COMPAT_KUROK))
+#define IS_SUPERHOT ((compat_gametype) == (COMPAT_SUPERHOT))
 
 #endif // _COMPAT_H_

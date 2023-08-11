@@ -376,6 +376,41 @@ model_t *Mod_ForName (char *name, qboolean crash)
 
 byte	*mod_base;
 
+byte* convert_btex_to_superhot(char* name, byte* data, int width, int height)
+{
+	int pixels = width * height;
+
+	// Lava is red
+	if (strcasecmp(name, "*lava1") == 0 || strcasecmp(name, "*lava2") == 0) {
+		for (int i = 0; i < pixels; i++) {
+			data[i] = 247;
+		}
+	} 
+	// Water is blue
+	else if (strcasecmp(name, "*water0") == 0 || strcasecmp(name, "*water1") == 0 || strcasecmp(name, "*water2") == 0) {
+		for (int i = 0; i < pixels; i++) {
+			data[i] = 245;
+		}
+	}
+	// Teleporter is dark purple
+	else if (strcasecmp(name, "*teleport") == 0) {
+		for (int i = 0; i < pixels; i++) {
+			data[i] = 142;
+		}
+	}
+	// Default to gray with fullbrights yellow
+	else {
+		for (int i = 0; i < pixels; i++) {
+			if (data[i] > 243)
+				data[i] = 252;
+			else
+				data[i] = 6;
+		}	
+	}
+
+	return data;
+}
+
 /*
 =================
 Mod_LoadTextures
@@ -443,6 +478,13 @@ void Mod_LoadTextures (lump_t *l)
 
 		if (loadmodel->bspversion != HL_BSPVERSION && !strncmp(mt->name,"sky",3)) 
 		{
+			// Sky is completely white in SUPERHOT Quake
+			if (IS_SUPERHOT) {
+				for(int i = 0; i < tx->width*tx->height; i++) {
+					tx_pixels[i] = 15;
+				}
+			}
+
 			R_InitSky (tx_pixels);
 
 			mapTextureNameList.push_back(solidskytexture);
@@ -479,15 +521,23 @@ void Mod_LoadTextures (lump_t *l)
 				}
 			}
 		}
+
+		byte* tex_data;
+
+		if (IS_SUPERHOT)
+			tex_data = convert_btex_to_superhot(tx->name, (byte*)(tx_pixels), tx->width, tx->height);
+		else
+			tex_data = (byte*)(tx_pixels);
+
 		if (COM_CheckParm("-nearest"))
 		{
 			//texture_mode = GL_LINEAR_MIPMAP_NEAREST; //_LINEAR;
-			tx->gl_texturenum = GL_LoadTexture (mt->name, tx->width, tx->height, (byte *)(tx_pixels), qtrue, GU_NEAREST, level);
+			tx->gl_texturenum = GL_LoadTexture (mt->name, tx->width, tx->height, tex_data, qtrue, GU_NEAREST, level);
 			mapTextureNameList.push_back(tx->gl_texturenum);
 		}
 		else {
 			//texture_mode = GL_LINEAR_MIPMAP_NEAREST; //_LINEAR;
-			tx->gl_texturenum = GL_LoadTexture (mt->name, tx->width, tx->height, (byte *)(tx_pixels), qtrue, GU_LINEAR, level);
+			tx->gl_texturenum = GL_LoadTexture (mt->name, tx->width, tx->height, tex_data, qtrue, GU_LINEAR, level);
 			mapTextureNameList.push_back(tx->gl_texturenum);
 		}
 		free (tx_pixels);
@@ -1667,6 +1717,94 @@ void Mod_FloodFillSkin( byte *skin, int skinwidth, int skinheight )
 	}
 }
 
+qboolean model_is_weapon(char* name)
+{
+	if (strcasecmp(name, "progs/v_axe.mdl") == 0 ||
+		strcasecmp(name, "progs/v_nail.mdl") == 0 ||
+		strcasecmp(name, "progs/v_nail2.mdl") == 0 ||
+		strcasecmp(name, "progs/v_rock.mdl") == 0 ||
+		strcasecmp(name, "progs/v_rock2.mdl") == 0 ||
+		strcasecmp(name, "progs/v_shot.mdl") == 0 ||
+		strcasecmp(name, "progs/v_shot2.mdl") == 0 ||
+		strcasecmp(name, "progs/v_spike.mdl") == 0 ||
+		strcasecmp(name, "progs/v_light.mdl") == 0 ||
+		strcasecmp(name, "progs/g_nail.mdl") == 0 ||
+		strcasecmp(name, "progs/g_nail2.mdl") == 0 ||
+		strcasecmp(name, "progs/g_rock.mdl") == 0 ||
+		strcasecmp(name, "progs/g_rock2.mdl") == 0 ||
+		strcasecmp(name, "progs/g_shot.mdl") == 0 ||
+		strcasecmp(name, "progs/g_shot2.mdl") == 0 ||
+		strcasecmp(name, "progs/g_spike.mdl") == 0 ||
+		strcasecmp(name, "progs/flame.mdl") == 0 ||
+		strcasecmp(name, "progs/g_light.mdl") == 0)
+		return qtrue;
+
+	return qfalse;
+}
+
+qboolean model_is_enemy(char* name)
+{
+	if (strcasecmp(name, "progs/boss.mdl") == 0 ||
+		strcasecmp(name, "progs/enforcer.mdl") == 0 ||
+		strcasecmp(name, "progs/demon.mdl") == 0 ||
+		strcasecmp(name, "progs/h_demon.mdl") == 0 ||
+		strcasecmp(name, "progs/soldier.mdl") == 0 ||
+		strcasecmp(name, "progs/h_guard.mdl") == 0 ||
+		strcasecmp(name, "progs/hknight.mdl") == 0 ||
+		strcasecmp(name, "progs/h_hellkn.mdl") == 0 ||
+		strcasecmp(name, "progs/knight.mdl") == 0 ||
+		strcasecmp(name, "progs/h_knight.mdl") == 0 ||
+		strcasecmp(name, "progs/ogre.mdl") == 0 ||
+		strcasecmp(name, "progs/h_ogre.mdl") == 0 ||
+		strcasecmp(name, "progs/fish.mdl") == 0 ||
+		strcasecmp(name, "progs/dog.mdl") == 0 ||
+		strcasecmp(name, "progs/h_dog.mdl") == 0 ||
+		strcasecmp(name, "progs/wizard.mdl") == 0 ||
+		strcasecmp(name, "progs/h_wizard.mdl") == 0 ||
+		strcasecmp(name, "progs/tarbaby.mdl") == 0 ||
+		strcasecmp(name, "progs/shambler.mdl") == 0 ||
+		strcasecmp(name, "progs/h_shams.mdl") == 0 ||
+		strcasecmp(name, "progs/oldone.mdl") == 0 ||
+		strcasecmp(name, "progs/shalrath.mdl") == 0 ||
+		strcasecmp(name, "progs/h_shal.mdl") == 0 ||
+		strcasecmp(name, "progs/zombie.mdl") == 0 ||
+		strcasecmp(name, "progs/h_zombie.mdl") == 0 ||
+		strcasecmp(name, "progs/gib1.mdl") == 0 ||
+		strcasecmp(name, "progs/gib2.mdl") == 0 ||
+		strcasecmp(name, "progs/gib3.mdl") == 0 ||
+		strcasecmp(name, "progs/zom_gib.mdl") == 0)
+		return qtrue;
+
+	return qfalse;
+}
+
+byte* convert_model_to_superhot(char* name, byte* data, int width, int height)
+{
+	int pixels = width * height;
+
+	// View models are dark gray
+	if (model_is_weapon(name)) {
+		for (int i = 0; i < pixels; i++) {
+			data[i] = 1;
+		}
+	}
+	// Enemies are red
+	else if (model_is_enemy(name)) {
+		for (int i = 0; i < pixels; i++) {
+			data[i] = 251;
+		}
+	}
+	// Everything else is yellow
+	else {
+		for (int i = 0; i < pixels; i++) {
+			data[i] = 108;
+		}
+	}
+	
+
+	return data;
+}
+
 /*
 ===============
 Mod_LoadAllSkins
@@ -1692,28 +1830,27 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 	for (i=0 ; i<numskins ; i++)
 	{
 		if (pskintype->type == ALIAS_SKIN_SINGLE) {
-			if (COM_CheckParm("-nearest")){
 			Mod_FloodFillSkin( skin, pheader->skinwidth, pheader->skinheight );
-
 			snprintf(name, sizeof(name),  "%s_%i", loadmodel->name, i);
 
-			int gl_ident = GL_LoadTexture (name, pheader->skinwidth, pheader->skinheight, (byte *)(pskintype + 1) , qtrue, GU_NEAREST, 0);
+			int texturemode;
+			if (COM_CheckParm("-nearest"))
+				texturemode = GU_NEAREST;
+			else
+				texturemode = GU_LINEAR;
+
+			byte* skin_data;
+			if (IS_SUPERHOT) {
+				skin_data = convert_model_to_superhot(loadmodel->name, (byte *)(pskintype + 1), pheader->skinwidth, pheader->skinheight);
+			} else {
+				skin_data = (byte *)(pskintype + 1);
+			}
+
+			int gl_ident = GL_LoadTexture (name, pheader->skinwidth, pheader->skinheight, skin_data, qtrue, texturemode, 0);
 			pheader->gl_texturenum[i][0] = pheader->gl_texturenum[i][1] =
 			pheader->gl_texturenum[i][2] = pheader->gl_texturenum[i][3] =
 				gl_ident;
 			pskintype = (daliasskintype_t *)((byte *)(pskintype+1) + size);
-			}
-			else{
-			Mod_FloodFillSkin( skin, pheader->skinwidth, pheader->skinheight );
-
-			snprintf(name, sizeof(name),  "%s_%i", loadmodel->name, i);
-
-			int gl_ident = GL_LoadTexture (name, pheader->skinwidth, pheader->skinheight, (byte *)(pskintype + 1) , qtrue, GU_LINEAR, 0);
-			pheader->gl_texturenum[i][0] = pheader->gl_texturenum[i][1] =
-			pheader->gl_texturenum[i][2] = pheader->gl_texturenum[i][3] =
-				gl_ident;
-			pskintype = (daliasskintype_t *)((byte *)(pskintype+1) + size);
-			}
 		}
 		else 
 		{

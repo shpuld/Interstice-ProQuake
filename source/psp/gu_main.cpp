@@ -1343,7 +1343,11 @@ void R_DrawAliasModel (entity_t *ent)
     else
 		sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA);
 
-	sceGuShadeModel(GU_SMOOTH);
+	if (IS_SUPERHOT)
+		sceGuShadeModel(GU_FLAT);
+	else
+		sceGuShadeModel(GU_SMOOTH);
+
 	sceGumUpdateMatrix();
 
     if (r_interpolate_animation.value)

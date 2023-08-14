@@ -491,6 +491,23 @@ static void V_cshift_f (void)
 	cshift_empty.percent = atoi(Cmd_Argv(4));
 }
 
+/*
+==================
+V_DarkFlash_f
+
+SUPERHOT Quake specific version of BonusFlash, but dark.
+==================
+*/
+static void V_DarkFlash_f (void)
+{
+	if (IS_SUPERHOT) {
+		cl.cshifts[CSHIFT_BONUS].destcolor[0] = 0;
+		cl.cshifts[CSHIFT_BONUS].destcolor[1] = 0;
+		cl.cshifts[CSHIFT_BONUS].destcolor[2] = 0;
+		cl.cshifts[CSHIFT_BONUS].percent = 100;
+	}
+}
+
 
 /*
 ==================
@@ -1345,6 +1362,7 @@ V_Init
 void V_Init (void)
 {
 	Cmd_AddCommand ("v_cshift", V_cshift_f);
+	Cmd_AddCommand ("df", V_DarkFlash_f);
 	Cmd_AddCommand ("bf", V_BonusFlash_f);
 	Cmd_AddCommand ("centerview", V_StartPitchDrift_f);
 

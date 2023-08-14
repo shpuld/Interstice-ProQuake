@@ -28,6 +28,7 @@ server_t		sv;
 server_static_t	svs;
 
 cvar_t  sv_progs = {"sv_progs", "progs.dat" };
+cvar_t 	sv_protocol = {"sv_protocol", "15"}; // SUPERHOT Quake uses sv_protocol to check for proper support
 
 cvar_t	sv_defaultmap = {"sv_defaultmap","start"}; //Baker 3.95: R00k
 cvar_t	sv_ipmasking = {"sv_ipmasking","1",false, true}; //Baker 3.95: R00k
@@ -80,6 +81,7 @@ void SV_Init (void)
 	Cvar_RegisterVariable (&sv_aim, NULL);
 	Cvar_RegisterVariable (&sv_nostep, NULL);
 	Cvar_RegisterVariable (&sv_altnoclip, NULL); //johnfitz
+	Cvar_RegisterVariable (&sv_protocol, NULL);
 #ifdef PROQUAKE_EXTENSION
 	Cvar_RegisterVariable (&pq_fullpitch, NULL);	// JPG 2.01
 #endif

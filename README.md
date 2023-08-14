@@ -34,7 +34,7 @@ Build with `make`.
 | Slide | `slide` | Unplayable | Unplayable |
 | X-MEN: Ravages of Apocalypse | `xmen` | Unplayable | Unplayable |
 | Abyss of Pandemonium - The Final Mission | `aop` | Decent | Good |
-
+| SUPERHOT Quake | `shquake` | Good | Good |
 
     
 

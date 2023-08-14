@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2023 Ivy 
+Copyright (C) 2023 Ivy Bowling
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,5 +36,17 @@ extern int compat_gametype;
 #define IS_ROGUE    ((compat_gametype) == (COMPAT_ROGUE))
 #define IS_KUROK    ((compat_gametype) == (COMPAT_KUROK))
 #define IS_SUPERHOT ((compat_gametype) == (COMPAT_SUPERHOT))
+
+//
+// SUPERHOT Quake
+//
+#define TE_SHQ_THROWN_WEAPON_BREAK      40
+#define TE_SHQ_LASERSPIKE               41
+#define TE_SHQ_TRAIL                    42
+#define TE_SHQ_TRAIL2                   43
+#define TE_SHQ_TRAIL3                   44
+#define TE_SHQ_TELEPORT2                45
+
+extern void SHQ_CvarInit(void);
 
 #endif // _COMPAT_H_

@@ -169,6 +169,7 @@ void CL_ParseTEnt (void)
 		break;
 
 	case TE_SUPERSPIKE:			// super spike hitting wall
+	case TE_SHQ_LASERSPIKE:
 		pos[0] = MSG_ReadCoord ();
 		pos[1] = MSG_ReadCoord ();
 		pos[2] = MSG_ReadCoord ();
@@ -270,6 +271,7 @@ void CL_ParseTEnt (void)
 
 // PGM 01/21/97
 	case TE_BEAM:				// grappling hook beam
+	case TE_SHQ_TRAIL3:
 		CL_ParseBeam (Mod_ForName("progs/beam.mdl", true));
 		break;
 // PGM 01/21/97
@@ -282,6 +284,7 @@ void CL_ParseTEnt (void)
 		break;
 
 	case TE_TELEPORT:
+	case TE_SHQ_TELEPORT2:
 		pos[0] = MSG_ReadCoord ();
 		pos[1] = MSG_ReadCoord ();
 		pos[2] = MSG_ReadCoord ();
@@ -289,6 +292,7 @@ void CL_ParseTEnt (void)
 		break;
 
 	case TE_EXPLOSION2:				// color mapped explosion
+	case TE_SHQ_THROWN_WEAPON_BREAK:
 		pos[0] = MSG_ReadCoord ();
 		pos[1] = MSG_ReadCoord ();
 		pos[2] = MSG_ReadCoord ();
@@ -305,9 +309,16 @@ void CL_ParseTEnt (void)
 #endif
 		S_StartSound (-1, 0, cl_sfx_r_exp3, pos, 1, 1);
 		break;
-
+	case TE_SHQ_TRAIL:
+	case TE_SHQ_TRAIL2:
+		MSG_ReadShort ();
+		MSG_ReadCoord ();
+		MSG_ReadCoord ();
+		MSG_ReadCoord ();
+		//Con_Printf("TE_SHQ_TRAIL* unimplemented.\n");
+		break;
 	default:
-		Sys_Error ("CL_ParseTEnt: bad type");
+		Sys_Error ("CL_ParseTEnt: bad type %d", type);
 	}
 }
 

@@ -1151,6 +1151,10 @@ void Host_Init (quakeparms_t *parms)
 
 	}
 
+	// SUPERHOT Quake's many cvars
+	if (IS_SUPERHOT)
+		SHQ_CvarInit ();
+
 	Cbuf_InsertText ("exec quake.rc\n");
 	Cmd_ExecPatch_f ();
 

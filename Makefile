@@ -70,6 +70,7 @@ COMMON_OBJS = \
 	$(OBJ_DIR)/console.o \
 	$(OBJ_DIR)/crc.o \
 	$(OBJ_DIR)/cvar.o \
+	$(OBJ_DIR)/compat.o \
 	$(OBJ_DIR)/host.o \
 	$(OBJ_DIR)/host_cmd.o \
 	$(OBJ_DIR)/keys.o \

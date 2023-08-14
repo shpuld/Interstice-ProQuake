@@ -313,6 +313,17 @@ void PF_sprint (void)
 	MSG_WriteString (&client->message, s );
 }
 
+void PF_65(void)
+{
+	if (IS_SUPERHOT)
+		PF_centerprint();
+}
+
+void PF_66(void)
+{
+	if (IS_SUPERHOT)
+		PF_centerprint();
+}
 
 /*
 =================
@@ -1739,8 +1750,8 @@ PF_Fixme,
 PF_Fixme,
 PF_Fixme,
 PF_Fixme,
-PF_Fixme,
-PF_Fixme,
+PF_65,		// #65, SUPERHOT Quake uses this for its prints
+PF_66,		// #66, see above. this is for "closed captions" in SHQ.
 #endif
 
 SV_MoveToGoal,

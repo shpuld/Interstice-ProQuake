@@ -456,7 +456,7 @@ void register_game(const char* dirname, int index)
 		sprintf(games_found[index].pretty_name, "SUPERHOT Quake", dirname);
 		games_found[index].heap_phat = 13 * 1024 * 1024;
 		games_found[index].heap_slim = 32 * 1024 * 1024;
-		games_found[index].status_phat = GAME_STATUS_DECENT;
+		games_found[index].status_phat = GAME_STATUS_PERFECT;
 		games_found[index].status_slim = GAME_STATUS_PERFECT;
 		games_found[index].compat_mode = COMPAT_SUPERHOT;
 	}

@@ -1,4 +1,4 @@
-# Interstice ProQuake v5.01
+# Interstice ProQuake v5.10
 
 This repository contains _Interstice_, an interation upon [_Insomnia_](https://github.com/darkduke606/Insomnia-ProQuake-Engine), part of the bloodline of ProQuake sourceports for the PlayStation Portable handheld.
 
@@ -41,6 +41,19 @@ Build with `make`.
 Interstice uses a hardware accelerated `.mp3` decoder for CD Audio support, this means other formats like `.flac` and `.ogg` are unsupported. It uses the widely-adopted standard for path and file name, that standard being `<GAMEDIR>/music/track01.mp3`. It will fall back to the `id1` directory to try and load a track there if one is not present in the loaded game directory. It is recommended to lower the rate of your music tracks to 22kHz, but the standard 44.1kHz sourced directly from Quake CDs will play without issue. Interstice fixes the bug with Mission Pack 1's `HIPDEMO.DEM` referencing a track `98` instead of `02`.
 
 ## Changelog
+
+### 5.10
+* `sv_defaultmap` cvar can now be used to determine what map to start when beginning a new game (useful for mods).
+* Mods can now load patchfiles via `patches/GAMENAME/patch.cfg`, allowing for enhanced support for mods with alternative control schemes.
+* `config.cfg` will no longer always write to the `id1` directory, fixing mods writing config updates and breaking existing settings.
+* `id1/config.cfg` is now executed by default for select mods, restoring options like control and performance settings.
+* Added a control scheme patch for Kickflip Quake.
+* Mod loading interface now properly frees allocated memory.
+* Updated compatibility option for LibreQuake, as they have removed accidental inclusion of various high-memory assets.
+* Improved engine-compatibility support for various mods, fixing some problems with Quake Mission Packs 1 & 2.
+* Add full support for SUPERHOT Quake.
+* CD Audio will now properly always look in the loaded game directory to load a track, falling back to `id1` only if that seek failed.
+* Added a fix for Mission Pack 1's demo file referencing a CD Track that doesn't exist (`98` instead of `02`).
 
 ### 5.01
 * Add more compatibility list entries:

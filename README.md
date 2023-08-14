@@ -36,7 +36,9 @@ Build with `make`.
 | Abyss of Pandemonium - The Final Mission | `aop` | Decent | Good |
 | SUPERHOT Quake | `shquake` | Good | Good |
 
-    
+## CD Audio Support
+
+Interstice uses a hardware accelerated `.mp3` decoder for CD Audio support, this means other formats like `.flac` and `.ogg` are unsupported. It uses the widely-adopted standard for path and file name, that standard being `<GAMEDIR>/music/track01.mp3`. It will fall back to the `id1` directory to try and load a track there if one is not present in the loaded game directory. It is recommended to lower the rate of your music tracks to 22kHz, but the standard 44.1kHz sourced directly from Quake CDs will play without issue. Interstice fixes the bug with Mission Pack 1's `HIPDEMO.DEM` referencing a track `98` instead of `02`.
 
 ## Changelog
 

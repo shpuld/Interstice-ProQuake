@@ -166,6 +166,8 @@ extern "C" int sceKernelDelayThread(int delay);
 
 void CDAudio_Play(byte track, qboolean looping)
 {
+	FILE* f;
+
 	last_track = track;
 	CDAudio_Stop();
 
@@ -173,32 +175,26 @@ void CDAudio_Play(byte track, qboolean looping)
         track = 1;
 
 	char path[256];
-	if (COM_CheckParm("-modmusic")){
+
+	// Hipnotic/MP1's demo has a bug where it searches for track 98 instead of 2,
+	// so let's fix this.
+	if (track == 98 && IS_HIPNOTIC) {
+		track = 2;
+	}
+
+	// First try GAMEDIR/music/trackX.mp3 for path.
 	snprintf(path, sizeof(path), "%s/music/track%02u.mp3", com_gamedir, track);
-	}
-	else {
-	snprintf(path, sizeof(path), "%s/%s/music/track%02u.mp3", host_parms.basedir, IS_KUROK ? "kurok" : "id1", track);
-	}
-	
 
-/*	if (!strcmp(,"id1")
-
-		f = fopen (name, "r");
-		if (!f)
-		{
-			Con_DPrintf ("ERROR: couldn't open MP3 file for reading.\n");
-			// Check id1 folder
-			snprintf(path, sizeof(path), "%s/id1/music/track%02u.mp3", host_parms.basedir, track);
-		}
-		else
-		{
-			fclose (f);
-		}
-*/
+	// Open that file to see if it exists
+	f = fopen(path, "r");
+	if (!f) {
+		// Set path to the GAMENAME (id1) folder instead
+		snprintf(path, sizeof(path), "%s/%s/music/track%02u.mp3", host_parms.basedir, GAMENAME, track);
+	}
+	fclose(f);
 
 	if (developer.value)
 		Con_SafePrintf("Playing %s",path);
-
 
 	int ret;
 	ret = mp3_start_play(path, 0);

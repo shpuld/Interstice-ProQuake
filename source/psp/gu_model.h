@@ -166,6 +166,14 @@ typedef struct msurface_s
 	byte		*samples;		// [numstyles*surfsize]
 } msurface_t;
 
+// this is for clipped vert groups
+typedef struct vertgroup_s
+{
+	glvert_t * verts;
+	std::size_t count;
+	msurface_t * face;
+} vertgroup_t;
+
 typedef struct mnode_s
 {
 // common with leaf

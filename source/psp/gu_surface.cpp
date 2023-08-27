@@ -645,8 +645,10 @@ void R_RenderBrushPoly (msurface_t *fa)
 	// this makes clipping more tricky, but they don't have LMs so no prob.
 	if (fa->flags & SURF_DRAWSKY)
 	{	// warp texture, no lightmaps
-		// shpuld: replace with scissor pass and then sky, maybe faster?
-		EmitBothSkyLayers (fa);
+		// shpuld: how does this even work? normally sky is not rendered here.
+		// is this just for bsp models that have sky textures in them?
+		Con_Printf("rendering ski in brush poly\n");
+		// EmitBothSkyLayers (fa);
 		return;
 	}
 
@@ -915,7 +917,9 @@ static void DrawTextureChains (void)
 		if (!s)
 			continue;
 		if (i == skytexturenum)
-			R_DrawSkyChain (s);
+		{
+			// R_DrawSkyChain (s);
+		}
 		else if (i == mirrortexturenum && r_mirroralpha.value != 1.0)
 		{
 			R_MirrorChain (s);
@@ -1165,6 +1169,122 @@ void R_RecursiveWorldNode (mnode_t *node)
 
 extern char	skybox_name[32];
 
+
+vec3_t skyverts[32];
+unsigned char skyindices[46] = {
+	0, 8,
+	1, 9,
+	2, 10,
+	3, 11,
+	4, 12,
+	5, 13,
+	6, 14,
+	7, 15,
+	23,
+	14, 22,
+	13, 21,
+	12, 20,
+	11, 19,
+	10, 18,
+	9, 17,
+	8, 16,
+	24,
+	17, 25,
+	18, 26,
+	19, 27,
+	20, 28,
+	21, 29,
+	22, 30,
+	23, 31
+};
+
+vec3_t verts2[4] = {
+	{ -30.f, -30.f, -17.f },
+	{ -30.f, -30.f, 17.f },
+	{ -30.f, 30.f, -17.f },
+	{ -30.f, 30.f, 17.f }
+};
+
+void R_SimpleSky () {
+	/*
+	for (int y = 0; y < 4; y++)
+	for (int x = 0; x < 8; x++)
+	{
+		skyverts[y * 8 + x][0] = -512.f;
+		skyverts[y * 8 + x][1] = (x - 3.5f) * 480.f / 3.5f;
+		skyverts[y * 8 + x][2] = (y - 1.5f) * 272.f / 1.5f;
+		// skyverts[y * 8 + x].st[0] = skyverts[y * 8 + x].xyz[1] * .001f;
+		// skyverts[y * 8 + x].st[1] = skyverts[y * 8 + x].xyz[2] * .001f;
+	}
+	*/
+	sceGumPushMatrix();
+	const ScePspFVector3 translate = { modelorg[0], modelorg[1], modelorg[2] };
+	sceGumTranslate(&translate);
+	sceGumUpdateMatrix();
+
+	const ScePspFVector3 rotation = {
+		-r_refdef.viewangles[2] * (GU_PI / 180.f),
+		-r_refdef.viewangles[0] * (GU_PI / 180.f),
+		(-180.f + r_refdef.viewangles[1]) * (GU_PI / 180.f)
+	};
+	sceGumRotateZYX(&rotation);
+	sceGumUpdateMatrix();
+	sceGuTexProjMapMode(GU_POSITION);
+	sceGuTexMapMode(GU_TEXTURE_MATRIX, 0, 0);
+
+	sceGumMatrixMode(GU_TEXTURE);
+	sceGumLoadIdentity();
+
+	const ScePspFVector3 texScale = {
+		0.25f,
+		0.25f,
+		1.0f
+	};
+
+	sceGumScale(&texScale);
+	sceGumRotateZYX(&rotation);
+	GL_Bind(solidskytexture);
+	sceGuDisable(GU_DEPTH_TEST);
+
+	sceGumUpdateMatrix();
+	sceGuDrawArray(GU_TRIANGLE_STRIP, GU_VERTEX_32BITF, 4, 0, verts2);
+
+	sceGuEnable(GU_BLEND);
+	sceGuTexFunc(GU_TFX_REPLACE, GU_TCC_RGBA);
+
+	GL_Bind(alphaskytexture);
+
+	sceGumLoadIdentity();
+
+	const ScePspFVector3 trans = {
+		cos(cl.time * 0.25f) * 4.f,
+		sin(cl.time * 0.25f) * 4.f,
+		0.0f
+	};
+	sceGumTranslate(&trans);
+	sceGumUpdateMatrix();
+
+	const ScePspFVector3 texScale2 = {
+		0.5f,
+		0.5f,
+		1.0f
+	};
+	sceGumScale(&texScale2);
+	sceGumRotateZ(cl.time * 0.002f);
+	sceGumRotateZYX(&rotation);
+	sceGumUpdateMatrix();
+
+	sceGuDrawArray(GU_TRIANGLE_STRIP, GU_VERTEX_32BITF, 4, 0, verts2);
+
+	sceGumMatrixMode(GU_MODEL);
+
+	sceGuTexProjMapMode(GU_UV);
+	sceGuTexMapMode(GU_TEXTURE_COORDS, 0, 0);
+	sceGuEnable(GU_DEPTH_TEST);
+	sceGumPopMatrix();
+	sceGumUpdateMatrix();
+}
+
 /*
 =============
 R_DrawWorld
@@ -1190,11 +1310,14 @@ void R_DrawWorld (void)
 	R_ClearSkyBox ();
 //#endif
 
+
 	R_RecursiveWorldNode (cl.worldmodel->nodes);
 
 	DrawTextureChains ();
 
 	R_BlendLightmaps ();
+
+	R_SimpleSky ();
 
 //#ifdef QUAKE2
     if (skybox_name[0])

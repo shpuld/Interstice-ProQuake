@@ -50,9 +50,19 @@ typedef struct glRect_s {
 //////////////////////////////////////////////////////////////////////////////
 // For none .lit maps.
 //////////////////////////////////////////////////////////////////////////////
-glpoly_t	*lightmap_polys[64];
 qboolean	lightmap_modified[64];
 glRect_t	lightmap_rectchange[64];
+
+#define MAX_VISIBLE_LIGHTMAPPED_FACES 1024
+// contains references to every msurface_t that's getting rendered.
+// in testing 512 is not enough for bigger complicated areas (like parts of dm2).
+// consider doubling to 2048 or somewhere inbetween.
+// when the limit gets exceeded, there will be some surfaces without lightmaps.
+lightmap_face_t lightmap_faces[MAX_VISIBLE_LIGHTMAPPED_FACES];
+// chains of lightmap faces for each lightmap num
+lightmap_face_t	*lightmap_chains[64];
+
+int num_lightmapped_faces;
 
 int			allocated[64][BLOCK_WIDTH];
 
@@ -65,8 +75,6 @@ int 		lightmap_index[64];
 // For gl_texsort 0
 msurface_t  *skychain = NULL;
 msurface_t  *waterchain = NULL;
-
-void R_RenderDynamicLightmaps (msurface_t *fa);
 
 void 	VID_SetLightmapPalette ();
 // switch palette for lightmaps
@@ -415,134 +423,44 @@ extern	int		alphaskytexture;
 extern	float	speedscale;		// for top sky and bottom sky
 
 
-static inline void DrawGLPolyLM (glpoly_t *p)
+static inline void DrawGLPolyLM (glpoly_t * poly)
 {
-	// Does this poly need clipped?
-
-
-	const int				unclipped_vertex_count	= p->numverts;
-	const glvert_t* const	unclipped_vertices		= &(p->verts[p->numverts]);
-
-	if (clipping::is_clipping_required(
-		unclipped_vertices,
-		unclipped_vertex_count))
+	if (r_showtris.value)
 	{
-		// Clip the polygon.
-		const glvert_t*	clipped_vertices;
-		std::size_t		clipped_vertex_count;
-		clipping::clip(
-			unclipped_vertices,
-			unclipped_vertex_count,
-			&clipped_vertices,
-			&clipped_vertex_count);
+		sceGuDisable(GU_TEXTURE_2D);
+		sceGuDisable(GU_BLEND);
 
-		// Did we have any vertices left?
-		if (clipped_vertex_count)
-		{
-			// Copy the vertices to the display list.
-			const std::size_t buffer_size = clipped_vertex_count * sizeof(glvert_t);
-			glvert_t* const display_list_vertices = static_cast<glvert_t*>(sceGuGetMemory(buffer_size));
-			memcpy(display_list_vertices, clipped_vertices, buffer_size);
+		// Draw the lines directly.
+		sceGumDrawArray(
+			GU_LINE_STRIP,
+			GU_TEXTURE_32BITF | GU_VERTEX_32BITF ,
+			poly->numclippedverts, 0, poly->display_list_verts);
 
-            if (r_showtris.value)
-            {
-                sceGuDisable(GU_TEXTURE_2D);
-                sceGuDisable(GU_BLEND);
+		sceGuEnable(GU_TEXTURE_2D);
+		sceGuEnable(GU_BLEND);
 
-                 // Draw the clipped vertices.
-                sceGumDrawArray(
-                    GU_LINE_STRIP,
-                    GU_TEXTURE_32BITF | GU_VERTEX_32BITF ,
-                    clipped_vertex_count, 0, display_list_vertices);
-
-                sceGuEnable(GU_TEXTURE_2D);
-                sceGuEnable(GU_BLEND);
-            }
-            else
-            {
-                // Draw the clipped vertices.
-                sceGuDrawArray(
-                    GU_TRIANGLE_FAN,
-                    GU_TEXTURE_32BITF | GU_VERTEX_32BITF ,
-                    clipped_vertex_count, 0, display_list_vertices);
-            }
-		}
-	}
-	else
-	{
-
-        if (r_showtris.value)
-        {
-            sceGuDisable(GU_TEXTURE_2D);
-            sceGuDisable(GU_BLEND);
-
-            // Draw the lines directly.
-            sceGumDrawArray(
-                GU_LINE_STRIP,
-                GU_TEXTURE_32BITF | GU_VERTEX_32BITF ,
-                unclipped_vertex_count, 0, unclipped_vertices);
-
-            sceGuEnable(GU_TEXTURE_2D);
-            sceGuEnable(GU_BLEND);
-
-        }
-        else
-        {
-            // Draw the poly directly.
-            sceGuDrawArray(
-                GU_TRIANGLE_FAN,
-                GU_TEXTURE_32BITF | GU_VERTEX_32BITF ,
-                unclipped_vertex_count, 0, unclipped_vertices);
-        }
-	}
-}
-
-static inline void DrawGLPoly (glpoly_t *p)
-{
-	// Does this poly need clipped?
-	const int				unclipped_vertex_count	= p->numverts;
-	const glvert_t* const	unclipped_vertices		= p->verts;
-
-	if (clipping::is_clipping_required(
-		unclipped_vertices,
-		unclipped_vertex_count))
-	{
-		// Clip the polygon.
-		const glvert_t*	clipped_vertices;
-		std::size_t		clipped_vertex_count;
-		clipping::clip(
-			unclipped_vertices,
-			unclipped_vertex_count,
-			&clipped_vertices,
-			&clipped_vertex_count);
-
-		// Did we have any vertices left?
-		if (clipped_vertex_count)
-		{
-			// Copy the vertices to the display list.
-			const std::size_t buffer_size = clipped_vertex_count * sizeof(glvert_t);
-			glvert_t* const display_list_vertices = static_cast<glvert_t*>(sceGuGetMemory(buffer_size));
-			memcpy(display_list_vertices, clipped_vertices, buffer_size);
-
-			// Draw the clipped vertices.
-			sceGuDrawArray(
-				GU_TRIANGLE_FAN,
-				GU_TEXTURE_32BITF | GU_VERTEX_32BITF,
-				clipped_vertex_count, 0, display_list_vertices);
-		}
 	}
 	else
 	{
 		// Draw the poly directly.
 		sceGuDrawArray(
 			GU_TRIANGLE_FAN,
-			GU_TEXTURE_32BITF | GU_VERTEX_32BITF,
-			unclipped_vertex_count, 0, unclipped_vertices);
+			GU_TEXTURE_32BITF | GU_VERTEX_32BITF ,
+			poly->numclippedverts, 0, poly->display_list_verts);
 	}
 }
 
+static inline void DrawGLPoly (glpoly_t * poly)
+{
 
-static void DrawGLWaterPoly (glpoly_t *p)
+	sceGuDrawArray(
+			GU_TRIANGLE_FAN,
+			GU_TEXTURE_32BITF | GU_VERTEX_32BITF,
+			poly->numclippedverts, 0, poly->display_list_verts);
+}
+
+
+static void DrawGLWaterPoly (glpoly_t * poly)
 {
 #if 0
 	int		i;
@@ -566,7 +484,7 @@ static void DrawGLWaterPoly (glpoly_t *p)
 	}
 	/*glEnd ();*/
 #else
-	DrawGLPoly(p);
+	DrawGLPoly(poly);
 #endif
 }
 
@@ -602,9 +520,6 @@ R_BlendLightmaps
 */
 static void R_BlendLightmaps (void)
 {
-	int			i;
-	glpoly_t	*p;
-
 	if (r_fullbright.value)
 		return;
 
@@ -617,41 +532,97 @@ static void R_BlendLightmaps (void)
 	if (r_lightmap.value)
 		sceGuDisable(GU_BLEND);
 
-	for (i=0 ; i<MAX_LIGHTMAPS ; i++)
+	lightmap_face_t * lmface;
+	for (int i=0; i < MAX_LIGHTMAPS; i++)
 	{
-        p = lightmap_polys[i];
-		if (!p)
+		lmface = lightmap_chains[i];
+		if (!lmface)
 			continue;
 
 		char lm_name[16];
 
-            if (lightmap_modified[i])
-            {
-                lightmap_modified[i] = qfalse;
-                lightmap_rectchange[i].l = BLOCK_WIDTH;
-                lightmap_rectchange[i].t = BLOCK_HEIGHT;
-                lightmap_rectchange[i].w = 0;
-                lightmap_rectchange[i].h = 0;
+		if (lightmap_modified[i])
+		{
+			lightmap_modified[i] = qfalse;
+			lightmap_rectchange[i].l = BLOCK_WIDTH;
+			lightmap_rectchange[i].t = BLOCK_HEIGHT;
+			lightmap_rectchange[i].w = 0;
+			lightmap_rectchange[i].h = 0;
 
-                snprintf(lm_name, sizeof(lm_name), "lightmap%d",i);
-                lightmap_index[i] = GL_LoadLightmapTexture (lm_name, BLOCK_WIDTH, BLOCK_HEIGHT, lightmaps+(i*BLOCK_WIDTH*BLOCK_HEIGHT*LIGHTMAP_BYTES), LIGHTMAP_BYTES, GU_LINEAR, qtrue);
-            }
-            GL_BindLightmap (lightmap_index[i]);
-            for ( ; p ; p=p->chain)
-            {
-                if (p->flags & SURF_UNDERWATER)
-                    DrawGLPolyLM(p);
-                else
-                    DrawGLPolyLM(p);
-            }
+			snprintf(lm_name, sizeof(lm_name), "lightmap%d",i);
+			lightmap_index[i] = GL_LoadLightmapTexture (lm_name, BLOCK_WIDTH, BLOCK_HEIGHT, lightmaps+(i*BLOCK_WIDTH*BLOCK_HEIGHT*LIGHTMAP_BYTES), LIGHTMAP_BYTES, GU_LINEAR, qtrue);
+		}
+		GL_BindLightmap (lightmap_index[i]);
+	
+		for (; lmface; lmface = lmface->next) {
+			msurface_t * face = lmface->face;
+			float scale = 0.0625f;
+			float tscale = face->texinfo->texture->width / (BLOCK_WIDTH * 16.f);
+			float sscale = face->texinfo->texture->height / (BLOCK_HEIGHT * 16.f);
+			
+			sceGuTexScale(tscale, sscale);
+			sceGuTexOffset(
+				tscale * (float)(-1.f * face->texturemins[0] + face->light_s * 16 + 8) / (float)(face->texinfo->texture->width),
+				sscale * (float)(-1.f * face->texturemins[1] + face->light_t * 16 + 8) / (float)(face->texinfo->texture->height)
+			);
 
+			DrawGLPolyLM(face->polys);
+		}
 	}
 
     VID_SetGlobalPalette ();
-
+	sceGuTexOffset(0, 0);
+	sceGuTexScale(1, 1);
 	sceGuDisable(GU_BLEND);
 	sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
 	sceGuDepthMask (GU_FALSE);
+}
+
+
+int ClipFace (msurface_t * fa)
+{
+	// shpuld: moved clipping here to have it in one place only
+	int verts_total = 0;
+	glpoly_t* poly = fa->polys;
+	const int unclipped_vertex_count = poly->numverts;
+	const glvert_t* const unclipped_vertices = poly->verts;
+
+	if (clipping::is_clipping_required(
+		unclipped_vertices,
+		unclipped_vertex_count))
+	{
+		// Clip the polygon.
+		const glvert_t*	clipped_vertices;
+		std::size_t		clipped_vertex_count;
+		clipping::clip(
+			unclipped_vertices,
+			unclipped_vertex_count,
+			&clipped_vertices,
+			&clipped_vertex_count
+		);
+
+		verts_total += clipped_vertex_count;
+
+		// Did we have any vertices left?
+		if (!clipped_vertex_count)
+		{
+			poly->numclippedverts = 0;
+			return verts_total;
+		}
+
+		const std::size_t buffer_size = clipped_vertex_count * sizeof(glvert_t);
+		poly->display_list_verts = static_cast<glvert_t*>(sceGuGetMemory(buffer_size));
+		memcpy(poly->display_list_verts, clipped_vertices, buffer_size);
+		poly->numclippedverts = clipped_vertex_count;
+	} else {
+		verts_total += unclipped_vertex_count;
+
+		const std::size_t buffer_size = unclipped_vertex_count * sizeof(glvert_t);
+		poly->display_list_verts = static_cast<glvert_t*>(sceGuGetMemory(buffer_size));
+		memcpy(poly->display_list_verts, unclipped_vertices, buffer_size);
+		poly->numclippedverts = unclipped_vertex_count;
+	}
+	return verts_total;
 }
 
 /*
@@ -670,8 +641,11 @@ void R_RenderBrushPoly (msurface_t *fa)
 
 	c_brush_polys++;
 
+	// sky and water use multiple polys per surface,
+	// this makes clipping more tricky, but they don't have LMs so no prob.
 	if (fa->flags & SURF_DRAWSKY)
 	{	// warp texture, no lightmaps
+		// shpuld: replace with scissor pass and then sky, maybe faster?
 		EmitBothSkyLayers (fa);
 		return;
 	}
@@ -684,6 +658,13 @@ void R_RenderBrushPoly (msurface_t *fa)
 		EmitWaterPolys (fa);
 		return;
 	}
+
+	// Everything from here only uses 1 poly from fa->polys
+
+	int verts_count = ClipFace(fa);
+
+	if (verts_count <= 0)
+		return;
 
 	sceGuEnable(GU_ALPHA_TEST);
 	sceGuAlphaFunc(GU_GREATER, 0x88, 0xff);
@@ -775,10 +756,14 @@ void R_RenderBrushPoly (msurface_t *fa)
 	else
 		DrawGLPoly (fa->polys);
 
-	// add the poly to the proper lightmap chain
-
-    fa->polys->chain = lightmap_polys[fa->lightmaptexturenum];
-    lightmap_polys[fa->lightmaptexturenum] = fa->polys;
+	// Manage lightmap chain
+	if (num_lightmapped_faces < MAX_VISIBLE_LIGHTMAPPED_FACES)
+	{
+		lightmap_faces[num_lightmapped_faces].face = fa;
+		lightmap_faces[num_lightmapped_faces].next = lightmap_chains[fa->lightmaptexturenum];
+		lightmap_chains[fa->lightmaptexturenum] = &lightmap_faces[num_lightmapped_faces];
+		num_lightmapped_faces++;
+	}
 
 	// check for lightmap modification
 	for (maps = 0 ; maps < MAXLIGHTMAPS && fa->styles[maps] != 255 ;
@@ -820,67 +805,6 @@ dynamic:
 
 	sceGuAlphaFunc(GU_GREATER, 0, 0xff);
 	sceGuDisable(GU_ALPHA_TEST);
-}
-
-/*
-================
-R_RenderDynamicLightmaps
-Multitexture
-================
-*/
-void R_RenderDynamicLightmaps (msurface_t *fa)
-{
-// texture_t	*t;
-	byte		*base;
-	int			maps;
-	glRect_t    *theRect;
-	int smax, tmax;
-
-	c_brush_polys++;
-
-	if (fa->flags & ( SURF_DRAWSKY | SURF_DRAWTURB) )
-		return;
-
-    fa->polys->chain = lightmap_polys[fa->lightmaptexturenum];
-    lightmap_polys[fa->lightmaptexturenum] = fa->polys;
-
-	// check for lightmap modification
-	for (maps = 0 ; maps < MAXLIGHTMAPS && fa->styles[maps] != 255 ;
-		 maps++)
-		if (d_lightstylevalue[fa->styles[maps]] != fa->cached_light[maps])
-			goto dynamic;
-
-	if (fa->dlightframe == r_framecount	// dynamic this frame
-		|| fa->cached_dlight)			// dynamic previously
-	{
-dynamic:
-		if (r_dynamic.value && cl.gametype != GAME_DEATHMATCH)
-		{
-            lightmap_modified[fa->lightmaptexturenum] = qtrue;
-            theRect = &lightmap_rectchange[fa->lightmaptexturenum];
-
-			if (fa->light_t < theRect->t) {
-				if (theRect->h)
-					theRect->h += theRect->t - fa->light_t;
-				theRect->t = fa->light_t;
-			}
-			if (fa->light_s < theRect->l) {
-				if (theRect->w)
-					theRect->w += theRect->l - fa->light_s;
-				theRect->l = fa->light_s;
-			}
-			smax = (fa->extents[0]>>4)+1;
-			tmax = (fa->extents[1]>>4)+1;
-			if ((theRect->w + theRect->l) < (fa->light_s + smax))
-				theRect->w = (fa->light_s-theRect->l)+smax;
-			if ((theRect->h + theRect->t) < (fa->light_t + tmax))
-				theRect->h = (fa->light_t-theRect->t)+tmax;
-
-            base = lightmaps + fa->lightmaptexturenum*LIGHTMAP_BYTES*BLOCK_WIDTH*BLOCK_HEIGHT;
-			base += fa->light_t * BLOCK_WIDTH * LIGHTMAP_BYTES + fa->light_s * LIGHTMAP_BYTES;
-			R_BuildLightMap (fa, base, BLOCK_WIDTH*LIGHTMAP_BYTES);
-		}
-	}
 }
 
 /*
@@ -1048,7 +972,8 @@ void R_DrawBrushModel (entity_t *ent)
 	if (R_CullBox (mins, maxs))
 		return;
 
-    memset (lightmap_polys, 0, sizeof(lightmap_polys));
+    memset (lightmap_chains, 0, sizeof(lightmap_chains));
+	num_lightmapped_faces = 0;
 
 	VectorSubtract (r_refdef.vieworg, ent->origin, modelorg);
 	if (rotated)
@@ -1258,7 +1183,8 @@ void R_DrawWorld (void)
 	currenttexture = -1;
 
 	/*glColor3f (1,1,1);*/
-    memset (lightmap_polys, 0, sizeof(lightmap_polys));
+    memset (lightmap_chains, 0, sizeof(lightmap_chains));
+	num_lightmapped_faces = 0;
 
 //#ifdef QUAKE2
 	R_ClearSkyBox ();
@@ -1422,10 +1348,7 @@ static void BuildSurfaceDisplayList (msurface_t *fa)
 	pedges = currentmodel->edges;
 	lnumverts = fa->numedges;
 	vertpage = 0;
-
-
-	// draw texture
-	poly = static_cast<glpoly_t*>(Hunk_Alloc (sizeof(glpoly_t) + (lnumverts * 2 - 1) * sizeof(glvert_t)));
+	poly = static_cast<glpoly_t*>(Hunk_Alloc (sizeof(glpoly_t) + (lnumverts - 1) * sizeof(glvert_t)));
 	poly->next = fa->polys;
 	poly->flags = fa->flags;
 	fa->polys = poly;
@@ -1454,23 +1377,6 @@ static void BuildSurfaceDisplayList (msurface_t *fa)
 		VectorCopy(vec, poly->verts[i].xyz);
 		poly->verts[i].st[0] = s;
 		poly->verts[i].st[1] = t;
-
-		// lightmap texture coordinates
-		s = DotProduct (vec, fa->texinfo->vecs[0]) + fa->texinfo->vecs[0][3];
-		s -= fa->texturemins[0];
-		s += fa->light_s*16;
-		s += 8;
-		s /= BLOCK_WIDTH*16; //fa->texinfo->texture->width;
-
-		t = DotProduct (vec, fa->texinfo->vecs[1]) + fa->texinfo->vecs[1][3];
-		t -= fa->texturemins[1];
-		t += fa->light_t*16;
-		t += 8;
-		t /= BLOCK_HEIGHT*16; //fa->texinfo->texture->height;
-
-		VectorCopy(vec, poly->verts[i + lnumverts].xyz);
-		poly->verts[i + lnumverts].st[0] = s;
-		poly->verts[i + lnumverts].st[1] = t;
 	}
 
 
@@ -1510,7 +1416,6 @@ static void BuildSurfaceDisplayList (msurface_t *fa)
 				for (j = i + 1; j < lnumverts; ++j)
 				{
 					poly->verts[j - 1] = poly->verts[j];
-					poly->verts[lm_vert_offset + j - 1] = poly->verts[lm_vert_offset+j];
 				}
 
 				--lnumverts;
@@ -1520,13 +1425,6 @@ static void BuildSurfaceDisplayList (msurface_t *fa)
 				--i;
 			}
 		}
-
-		if (numRemoved > 0) {
-			for (j = lm_vert_offset; j < lm_vert_offset + lnumverts; j++) {
-				poly->verts[j - numRemoved] = poly->verts[j];
-			}
-		}
-
 	}
 
 	// Colinear point removal-end
@@ -1593,8 +1491,9 @@ void GL_BuildLightmaps (void)
 
 		r_pcurrentvertbase = m->vertexes;
 		currentmodel = m;
-		for (i=0 ; i<m->numsurfaces ; i++)
+		for (i = 0; i < m->numsurfaces; i++)
 		{
+			// todo: investigate why this is done even for turb/sky
 			GL_CreateSurfaceLightmap (m->surfaces + i);
 			if ( m->surfaces[i].flags & SURF_DRAWTURB )
 				continue;
@@ -1612,20 +1511,18 @@ void GL_BuildLightmaps (void)
 	char lm_name[16];
 	for (i=0 ; i<MAX_LIGHTMAPS ; i++)
 	{
-            if (!allocated[i][0])
-                break;		// no more used
+		if (!allocated[i][0])
+			break;		// no more used
 
-            lightmap_modified[i] = qfalse;
-            lightmap_rectchange[i].l = BLOCK_WIDTH;
-            lightmap_rectchange[i].t = BLOCK_HEIGHT;
-            lightmap_rectchange[i].w = 0;
-            lightmap_rectchange[i].h = 0;
+		lightmap_modified[i] = qfalse;
+		lightmap_rectchange[i].l = BLOCK_WIDTH;
+		lightmap_rectchange[i].t = BLOCK_HEIGHT;
+		lightmap_rectchange[i].w = 0;
+		lightmap_rectchange[i].h = 0;
 
-            snprintf(lm_name,sizeof(lm_name), "lightmap%d",i);
-            lightmap_index[i] = GL_LoadLightmapTexture (lm_name, BLOCK_WIDTH, BLOCK_HEIGHT, lightmaps+(i*BLOCK_WIDTH*BLOCK_HEIGHT*LIGHTMAP_BYTES), LIGHTMAP_BYTES, GU_LINEAR, qtrue);
+		snprintf(lm_name,sizeof(lm_name), "lightmap%d",i);
+		lightmap_index[i] = GL_LoadLightmapTexture (lm_name, BLOCK_WIDTH, BLOCK_HEIGHT, lightmaps+(i*BLOCK_WIDTH*BLOCK_HEIGHT*LIGHTMAP_BYTES), LIGHTMAP_BYTES, GU_LINEAR, qtrue);
 
 	}
-
-//	Con_Printf("Lightmaps: %i\n", i);
 }
 

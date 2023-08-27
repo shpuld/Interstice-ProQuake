@@ -125,13 +125,10 @@ typedef struct glpoly_s
 	int			numverts;
 	int			flags;		// for SURF_UNDERWATER
 
-	// This is a variable sized array, and hence must be the last element in
-	// this structure.
-	//
-	// The array is (numverts * 2) in size. The first half are regular
-	// vertices, and the second half have copies of the first half's XYZs but
-	// keep the light map texture coordinates. This makes the vertices easier
-	// to render on the PSP.
+	// shpuld: for display list allocated temporary memory for psp rendering
+	int			numclippedverts;
+	glvert_t	* display_list_verts;
+	// Variable size array, has to be the last element of the struct. actual size is numverts
 	glvert_t	verts[1];
 } glpoly_t;
 
@@ -165,6 +162,11 @@ typedef struct msurface_s
 	qboolean	cached_dlight;				// true if dynamic light in cache
 	byte		*samples;		// [numstyles*surfsize]
 } msurface_t;
+
+typedef struct lightmap_face_s {
+	msurface_t *face;
+	struct lightmap_face_s *next;
+} lightmap_face_t;
 
 typedef struct mnode_s
 {

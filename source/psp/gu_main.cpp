@@ -582,7 +582,7 @@ void GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, float apitch, float 
 
     lastposenum = posenum;
 
-	verts = (trivertx_t *)((byte *)paliashdr + paliashdr->posedata);
+	verts = (trivertx_t *)((char *)paliashdr + paliashdr->posedata);
 	verts += posenum * paliashdr->poseverts;
 
 	order = (int *)((byte *)paliashdr + paliashdr->commands);
@@ -614,9 +614,10 @@ void GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, float apitch, float 
 		// Allocate the vertices.
 		struct vertex
 		{
-			float u, v;
+			int uvs;
 			unsigned int color;
-			float x, y, z;
+			char x, y, z;
+			char _padding;
 		};
 
 		vertex* const out = static_cast<vertex*>(sceGuGetMemory(sizeof(vertex) * count));
@@ -624,9 +625,8 @@ void GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, float apitch, float 
 		for (int vertex_index = 0; vertex_index < count; ++vertex_index)
 		{
 			// texture coordinates come from the draw list
-			out[vertex_index].u = ((float *)order)[0];
-			out[vertex_index].v = ((float *)order)[1];
-			order += 2;
+			out[vertex_index].uvs = order[0];
+			order += 1;
 
 			// normals and vertexes come from the frame list
 
@@ -640,7 +640,7 @@ void GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, float apitch, float 
 
             if(vlight.value)
                 // RIOT - Vertex lighting
-                l = VLight_LerpLight(verts->lightnormalindex, verts->lightnormalindex, 1, apitch, ayaw);
+                l = VLight_GetLightValue(verts->lightnormalindex, apitch, ayaw);
             else
             {
                 float l1, l2, diff;
@@ -705,11 +705,11 @@ void GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, float apitch, float 
 		if (r_showtris.value)
 		{
 		    sceGuDisable(GU_TEXTURE_2D);
-            sceGumDrawArray(prim, GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_COLOR_8888, count, 0, out);
+            sceGumDrawArray(prim, GU_TEXTURE_16BIT | GU_VERTEX_8BIT | GU_COLOR_8888, count, 0, out);
             sceGuEnable(GU_TEXTURE_2D);
 		}
         else
-            sceGuDrawArray(prim, GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_COLOR_8888, count, 0, out);
+            sceGuDrawArray(prim, GU_TEXTURE_16BIT | GU_VERTEX_8BIT | GU_COLOR_8888, count, 0, out);
 	}
 }
 
@@ -733,7 +733,7 @@ void GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, floa
 	lastposenum0 = pose1;
 	lastposenum  = pose2;
 
-	verts1 = (trivertx_t *)((byte *)paliashdr + paliashdr->posedata);
+	verts1 = (trivertx_t *)((char *)paliashdr + paliashdr->posedata);
 	verts2 = verts1;
 
 	verts1 += pose1 * paliashdr->poseverts;
@@ -769,9 +769,10 @@ void GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, floa
 		// Allocate the vertices.
 		struct vertex
 		{
-			float u, v;
+			int uvs; // packed two shorts, easier to handle as int from order
 			unsigned int color;
-			float x, y, z;
+			char x, y, z;
+			char _padding;
 		};
 
 		vertex* const out = static_cast<vertex*>(sceGuGetMemory(sizeof(vertex) * count));
@@ -779,9 +780,8 @@ void GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, floa
 		for (int vertex_index = 0; vertex_index < count; ++vertex_index)
 		{
 			// texture coordinates come from the draw list
-			out[vertex_index].u = ((float *)order)[0];
-			out[vertex_index].v = ((float *)order)[1];
-			order += 2;
+			out[vertex_index].uvs = order[0];
+			order += 1;
 
 			// normals and vertexes come from the frame list
 			// blend the light intensity from the two frames together
@@ -854,11 +854,11 @@ void GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, floa
         if (r_showtris.value)
 		{
 		    sceGuDisable(GU_TEXTURE_2D);
-            sceGumDrawArray(prim, GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_COLOR_8888, count, 0, out);
+            sceGumDrawArray(prim, GU_TEXTURE_16BIT | GU_VERTEX_8BIT | GU_COLOR_8888, count, 0, out);
             sceGuEnable(GU_TEXTURE_2D);
 		}
 		else
-            sceGuDrawArray(prim, GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_COLOR_8888, count, 0, out);
+            sceGuDrawArray(prim, GU_TEXTURE_16BIT | GU_VERTEX_8BIT | GU_COLOR_8888, count, 0, out);
 	}
 }
 
@@ -1292,7 +1292,7 @@ void R_DrawAliasModel (entity_t *ent)
 	const ScePspFVector3 translation = { paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2] };
 	sceGumTranslate(&translation);
 
-	const ScePspFVector3 scaling = { paliashdr->scale[0], paliashdr->scale[1], paliashdr->scale[2] };
+	const ScePspFVector3 scaling = { paliashdr->scale[0] * 128, paliashdr->scale[1] * 128, paliashdr->scale[2] * 128 };
 	sceGumScale(&scaling);
 
 	anim = (int)(cl.time*10) & 3;

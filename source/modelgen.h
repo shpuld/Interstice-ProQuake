@@ -91,20 +91,25 @@ typedef struct dtriangle_s {
 // load this data
 
 typedef struct {
-	byte	v[3];
+	char	v[3]; // Signed because that's what PSP likes
 	byte	lightnormalindex;
 } trivertx_t;
 
 typedef struct {
-	trivertx_t	bboxmin;	// lightnormal isn't used
-	trivertx_t	bboxmax;	// lightnormal isn't used
+	byte	v[3];
+	byte	lightnormalindex;
+} utrivertx_t;
+
+typedef struct {
+	utrivertx_t	bboxmin;	// lightnormal isn't used
+	utrivertx_t	bboxmax;	// lightnormal isn't used
 	char		name[16];	// frame name from grabbing
 } daliasframe_t;
 
 typedef struct {
 	int			numframes;
-	trivertx_t	bboxmin;	// lightnormal isn't used
-	trivertx_t	bboxmax;	// lightnormal isn't used
+	utrivertx_t	bboxmin;	// lightnormal isn't used
+	utrivertx_t	bboxmax;	// lightnormal isn't used
 } daliasgroup_t;
 
 typedef struct {

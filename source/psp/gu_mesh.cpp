@@ -218,6 +218,12 @@ static void BuildTris (void)
 	numorder = 0;
 	numcommands = 0;
 	memset (used, 0, sizeof(used));
+
+	union uv_union {
+		int i;
+		short uv[2];
+	};
+
 	for (i=0 ; i<pheader->numtris ; i++)
 	{
 		// pick an unused triangle and start the trifan
@@ -269,8 +275,13 @@ static void BuildTris (void)
 			s = (s + 0.5) / pheader->skinwidth;
 			t = (t + 0.5) / pheader->skinheight;
 
-			*(float *)&commands[numcommands++] = s;
-			*(float *)&commands[numcommands++] = t;
+			// Convert float 0-1 range to positive signed short range
+			// so from 0 to 32767. This is how PSP wants 16bit tex coords.
+			uv_union st;
+			st.uv[0] = (short)(s * 32767);
+			st.uv[1] = (short)(t * 32767); 
+
+			commands[numcommands++] = st.i;
 		}
 	}
 
@@ -298,9 +309,9 @@ void GL_MakeAliasModelDisplayLists (model_t *m, aliashdr_t *hdr)
 
 	paliashdr->poseverts = numorder;
 
-	int* cmds = static_cast<int*>(Hunk_Alloc (numcommands * 4));
+	int* cmds = static_cast<int*>(Hunk_Alloc (numcommands * sizeof(int)));
 	paliashdr->commands = (byte *)cmds - (byte *)paliashdr;
-	memcpy (cmds, commands, numcommands * 4);
+	memcpy (cmds, commands, numcommands * sizeof(int));
 
 	trivertx_t* verts = static_cast<trivertx_t*>(Hunk_Alloc (paliashdr->numposes * paliashdr->poseverts 
 		* sizeof(trivertx_t) ));

@@ -1544,7 +1544,8 @@ int			posenum;
 byte		**player_8bit_texels_tbl;
 byte		*player_8bit_texels;
 
-byte	aliasbboxmins[3], aliasbboxmaxs[3];
+// use signed for PSP friendly coords
+char	aliasbboxmins[3], aliasbboxmaxs[3];
 
 /*
 =================
@@ -1566,8 +1567,8 @@ void * Mod_LoadAliasFrame (void * pin, maliasframedesc_t *frame)
 	for (i=0 ; i<3 ; i++)
 	{
 	// these are byte values, so we don't have to worry about endianness
-		frame->bboxmin.v[i] = pdaliasframe->bboxmin.v[i];
-		frame->bboxmax.v[i] = pdaliasframe->bboxmax.v[i];
+		frame->bboxmin.v[i] = pdaliasframe->bboxmin.v[i] - 128;
+		frame->bboxmax.v[i] = pdaliasframe->bboxmax.v[i] - 128;
 
 		aliasbboxmins[i] = QMIN(aliasbboxmins[i], frame->bboxmin.v[i]);
 		aliasbboxmaxs[i] = QMAX(aliasbboxmaxs[i], frame->bboxmax.v[i]);
@@ -1576,6 +1577,14 @@ void * Mod_LoadAliasFrame (void * pin, maliasframedesc_t *frame)
 	pinframe = (trivertx_t *)(pdaliasframe + 1);
 
 	poseverts[posenum] = pinframe;
+
+	for (i = 0; i < pheader->numverts; i++) {
+		utrivertx_t * unsigned_vert = (utrivertx_t*)&(poseverts[posenum][i]);
+		poseverts[posenum][i].v[0] = unsigned_vert->v[0] - 128;
+		poseverts[posenum][i].v[1] = unsigned_vert->v[1] - 128;
+		poseverts[posenum][i].v[2] = unsigned_vert->v[2] - 128;
+	}
+
 	posenum++;
 
 	pinframe += pheader->numverts;
@@ -1606,8 +1615,8 @@ void *Mod_LoadAliasGroup (void * pin,  maliasframedesc_t *frame)
 	for (i=0 ; i<3 ; i++)
 	{
 	// these are byte values, so we don't have to worry about endianness
-		frame->bboxmin.v[i] = pingroup->bboxmin.v[i];
-		frame->bboxmax.v[i] = pingroup->bboxmax.v[i];
+		frame->bboxmin.v[i] = pingroup->bboxmin.v[i] - 128;
+		frame->bboxmax.v[i] = pingroup->bboxmax.v[i] - 128;
 
 		aliasbboxmins[i] = QMIN(aliasbboxmins[i], frame->bboxmin.v[i]);
 		aliasbboxmaxs[i] = QMAX(aliasbboxmaxs[i], frame->bboxmax.v[i]);
@@ -1624,6 +1633,14 @@ void *Mod_LoadAliasGroup (void * pin,  maliasframedesc_t *frame)
 	for (i=0 ; i<numframes ; i++)
 	{
 		poseverts[posenum] = (trivertx_t *)((daliasframe_t *)ptemp + 1);
+
+		for (int j = 0; j < pheader->numverts; j++) {
+			utrivertx_t * unsigned_vert = (utrivertx_t*)&(poseverts[posenum][j]);
+			poseverts[posenum][j].v[0] = unsigned_vert->v[0] - 128;
+			poseverts[posenum][j].v[1] = unsigned_vert->v[1] - 128;
+			poseverts[posenum][j].v[2] = unsigned_vert->v[2] - 128;
+		}
+
 		posenum++;
 
 		ptemp = (trivertx_t *)((daliasframe_t *)ptemp + 1) + pheader->numverts;
@@ -1955,8 +1972,8 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 	for (i=0 ; i<3 ; i++)
 	{
 		pheader->scale[i] = LittleFloat (pinmodel->scale[i]);
-		pheader->scale_origin[i] = LittleFloat (pinmodel->scale_origin[i]);
-		pheader->eyeposition[i] = LittleFloat (pinmodel->eyeposition[i]);
+		pheader->scale_origin[i] = LittleFloat (pinmodel->scale_origin[i]) + pheader->scale[i] * 128;
+		pheader->eyeposition[i] = LittleFloat (pinmodel->eyeposition[i]) + pheader->scale[i] * 128;
 	}
 
 // load the skins
@@ -1990,8 +2007,8 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 	posenum = 0;
 	pframetype = (daliasframetype_t *)&pintriangles[pheader->numtris];
 
-	aliasbboxmins[0] = aliasbboxmins[1] = aliasbboxmins[2] = 255;
-	aliasbboxmaxs[0] = aliasbboxmaxs[1] = aliasbboxmaxs[2] = 0;
+	aliasbboxmins[0] = aliasbboxmins[1] = aliasbboxmins[2] = 127;
+	aliasbboxmaxs[0] = aliasbboxmaxs[1] = aliasbboxmaxs[2] = -128;
 
 	for (i=0 ; i<numframes ; i++)
 	{

@@ -164,6 +164,30 @@ qboolean R_CullBox (vec3_t mins, vec3_t maxs)
 	return qfalse;
 }
 
+/*
+=================
+R_FrustumCheck
+
+Returns 0 if box completely inside frustum
+Returns +N with intersected planes count as N
+Returns -1 when completely outside frustum
+=================
+*/
+int R_FrustumCheck (vec3_t mins, vec3_t maxs)
+{
+	int i, res;
+	int intersections = 0;
+	for (i=0 ; i<4 ; i++)
+	{
+		res = BoxOnPlaneSide (mins, maxs, &frustum[i]);
+		if (res == 2) return -1; 
+		if (res == 3) ++intersections;
+	}
+
+	return intersections;
+}
+
+
 // Baker: This is needed even without autoid now
 // due to bbox fix
 /*

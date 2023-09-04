@@ -247,6 +247,7 @@ void EmitReflectivePolys (msurface_t *fa);
 void EmitBothSkyLayers (msurface_t *fa);
 void R_DrawSkyChain (msurface_t *s);
 qboolean R_CullBox (vec3_t mins, vec3_t maxs);
+int R_FrustumCheck (vec3_t mins, vec3_t maxs);
 void R_MarkLights (dlight_t *light, int bit, mnode_t *node);
 
 //extern	float	bubblecolor[NUM_DLIGHTTYPES][4];

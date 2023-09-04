@@ -312,6 +312,15 @@ void EmitWaterPolys (msurface_t *fa)
 			++dst;
 		}
 
+		// Quick out if clipping broad phase ensures no clipping needed
+		if (!(fa->flags & SURF_NEEDSCLIPPING))
+		{
+			sceGuDrawArray(
+				GU_TRIANGLE_FAN,
+				GU_TEXTURE_32BITF | GU_VERTEX_32BITF,
+				unclipped_vertex_count, 0, unclipped_vertices);
+		}
+
 		// Do these vertices need clipped?
 		if (clipping::is_clipping_required(unclipped_vertices, unclipped_vertex_count))
 		{

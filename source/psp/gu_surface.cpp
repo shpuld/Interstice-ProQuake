@@ -578,9 +578,15 @@ static void R_BlendLightmaps (void)
 	sceGuDepthMask (GU_FALSE);
 }
 
-
 int ClipFace (msurface_t * fa)
 {
+	// skip maths if broad phase tells us we don't need clipping
+	if (!(fa->flags & SURF_NEEDSCLIPPING))
+	{
+		fa->polys->numclippedverts = fa->polys->numverts;
+		fa->polys->display_list_verts = fa->polys->verts;
+		return fa->polys->numverts;
+	}
 	// shpuld: moved clipping here to have it in one place only
 	int verts_total = 0;
 	glpoly_t* poly = fa->polys;
@@ -616,10 +622,7 @@ int ClipFace (msurface_t * fa)
 		poly->numclippedverts = clipped_vertex_count;
 	} else {
 		verts_total += unclipped_vertex_count;
-
-		const std::size_t buffer_size = unclipped_vertex_count * sizeof(glvert_t);
-		poly->display_list_verts = static_cast<glvert_t*>(sceGuGetMemory(buffer_size));
-		memcpy(poly->display_list_verts, unclipped_vertices, buffer_size);
+		poly->display_list_verts = poly->verts;
 		poly->numclippedverts = unclipped_vertex_count;
 	}
 	return verts_total;
@@ -969,8 +972,8 @@ void R_DrawBrushModel (entity_t *ent)
 		VectorAdd (ent->origin, clmodel->maxs, maxs);
 	}
 
-	if (R_CullBox (mins, maxs))
-		return;
+	int frustum_check = R_FrustumCheck (mins, maxs);
+	if (frustum_check < 0) return;
 
     memset (lightmap_chains, 0, sizeof(lightmap_chains));
 	num_lightmapped_faces = 0;
@@ -1020,7 +1023,9 @@ void R_DrawBrushModel (entity_t *ent)
 		if (((psurf->flags & SURF_PLANEBACK) && (dot < -BACKFACE_EPSILON)) ||
 			(!(psurf->flags & SURF_PLANEBACK) && (dot > BACKFACE_EPSILON)))
 		{
-				R_RenderBrushPoly (psurf);
+			psurf->flags &= ~SURF_NEEDSCLIPPING;
+			psurf->flags |= SURF_NEEDSCLIPPING * (frustum_check > 1);
+			R_RenderBrushPoly (psurf);
 		}
 	}
 	
@@ -1062,7 +1067,8 @@ void R_RecursiveWorldNode (mnode_t *node)
 
 	if (node->visframe != r_visframecount)
 		return;
-	if (R_CullBox (node->minmaxs, node->minmaxs+3))
+	int frustum_check = R_FrustumCheck (node->minmaxs, node->minmaxs+3);
+	if (frustum_check < 0)
 		return;
 
 // if a leaf node, draw stuff
@@ -1144,6 +1150,9 @@ void R_RecursiveWorldNode (mnode_t *node)
 					{
 						surf->texturechain = surf->texinfo->texture->texturechain;
 						surf->texinfo->texture->texturechain = surf;
+
+						surf->flags &= ~SURF_NEEDSCLIPPING;
+						surf->flags |= SURF_NEEDSCLIPPING * (frustum_check > 1);
 					}
 				}/* else if (surf->flags & SURF_DRAWSKY) {
 					surf->texturechain = skychain;

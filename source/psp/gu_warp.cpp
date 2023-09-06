@@ -319,6 +319,7 @@ void EmitWaterPolys (msurface_t *fa)
 				GU_TRIANGLE_FAN,
 				GU_TEXTURE_32BITF | GU_VERTEX_32BITF,
 				unclipped_vertex_count, 0, unclipped_vertices);
+			return;
 		}
 
 		// Do these vertices need clipped?

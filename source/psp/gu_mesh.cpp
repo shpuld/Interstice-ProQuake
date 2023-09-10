@@ -224,6 +224,8 @@ static void BuildTris (void)
 		short uv[2];
 	};
 
+	commands[numcommands++] = 0; // Reserve slot for size
+
 	for (i=0 ; i<pheader->numtris ; i++)
 	{
 		// pick an unused triangle and start the trifan
@@ -286,6 +288,8 @@ static void BuildTris (void)
 	}
 
 	commands[numcommands++] = 0;		// end of list marker
+
+	commands[0] = numcommands;
 
 	Con_DPrintf ("%3i tri %3i vert %3i cmd\n", pheader->numtris, numorder, numcommands);
 

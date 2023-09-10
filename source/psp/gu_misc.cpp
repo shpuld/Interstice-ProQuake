@@ -291,6 +291,8 @@ void R_Init (void)
     Sky_Init (); //johnfitz
 	//Fog_Init (); //johnfitz
 
+	R_CalculatePspVertexNormals ();
+
 #ifdef GLTEST
 	Test_Init ();
 #endif
@@ -299,6 +301,8 @@ void R_Init (void)
 	playertextures = texture_extension_number;
 	texture_extension_number += 16;
 	*/
+
+
 }
 
 /*

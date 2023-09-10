@@ -560,6 +560,7 @@ extern "C" float	r_avertexnormals[NUMVERTEXNORMALS][3];
 float r_avertexnormals[NUMVERTEXNORMALS][3] = {
 #include "../anorms.h"
 };
+char r_avertexnormalspsp[NUMVERTEXNORMALS][3];
 
 vec3_t	shadevector;
 float	shadelight, ambientlight; // LordHavoc: .lit support, removed shadelight and ambientlight
@@ -588,6 +589,18 @@ float old_i_model_transform;
 // vertex lighting
 float	apitch, ayaw;
 vec3_t	vertexlight;
+
+
+// shpuld: need normals in signed 8bit per axis format for psp hw lights etc
+void R_CalculatePspVertexNormals ()
+{
+	for (int i = 0; i < NUMVERTEXNORMALS; i++)
+	{
+		for (int j = 0; j < 3; j++)
+			r_avertexnormalspsp[i][j] = r_avertexnormals[i][j] * 255 - 128;
+	}
+}
+
 
 /*
 =============

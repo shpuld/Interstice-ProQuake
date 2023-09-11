@@ -578,8 +578,6 @@ static void R_BlendLightmaps (void)
 	sceGuDepthMask (GU_FALSE);
 }
 
-int faces_clipped, faces_checked, leaves_checked;
-
 int ClipFace (msurface_t * fa)
 {
 	// skip maths if broad phase tells us we don't need clipping
@@ -594,7 +592,6 @@ int ClipFace (msurface_t * fa)
 	glpoly_t* poly = fa->polys;
 	const int unclipped_vertex_count = poly->numverts;
 	const glvert_t* const unclipped_vertices = poly->verts;
-	faces_checked++;
 
 	if (clipping::is_clipping_required(
 		unclipped_vertices,
@@ -609,7 +606,6 @@ int ClipFace (msurface_t * fa)
 			&clipped_vertices,
 			&clipped_vertex_count
 		);
-		faces_clipped++;
 
 		verts_total += clipped_vertex_count;
 
@@ -1069,8 +1065,9 @@ void R_RecursiveWorldNode (mnode_t *node, bool nofrustumcheck)
 
 	if (node->visframe != r_visframecount)
 		return;
+
 	int frustum_check = nofrustumcheck ? 0 : R_FrustumCheck (node->minmaxs, node->minmaxs+3);
-	// if (!nofrustumcheck) leaves_checked++;
+
 	if (frustum_check < 0)
 		return;
 
@@ -1201,11 +1198,6 @@ void R_DrawWorld (void)
 //#ifdef QUAKE2
 	R_ClearSkyBox ();
 //#endif
-
-	// Con_Printf("%d / %d / %d\n", faces_clipped, faces_checked, leaves_checked);
-	faces_clipped = 0;
-	faces_checked = 0;
-	leaves_checked = 0;
 
 	R_RecursiveWorldNode (cl.worldmodel->nodes, false);
 

@@ -591,18 +591,91 @@ vec3_t	vertexlight;
 
 /*
 =============
+GL_DrawAliasBlendedWireFrame
+=============
+*/
+void GL_DrawAliasBlendedWireFrame (aliashdr_t *paliashdr, int pose1, int pose2, float blend)
+{
+	trivertx_t* verts1;
+	trivertx_t* verts2;
+	int*        order;
+	int         count;
+
+	lastposenum0 = pose1;
+	lastposenum  = pose2;
+
+	verts1 = (trivertx_t *)((char *)paliashdr + paliashdr->posedata);
+	verts2 = verts1;
+
+	verts1 += pose1 * paliashdr->poseverts;
+	verts2 += pose2 * paliashdr->poseverts;
+
+	order = (int *)((byte *)paliashdr + paliashdr->commands);
+
+	int numcommands = *order++;
+
+	// Allocate the vertices.
+	struct vertex
+	{
+		int uvs; // packed two shorts, easier to handle as int from order
+		int xyz;
+	};
+	vertex* const out = static_cast<vertex*>(sceGuGetMemory(sizeof(vertex) * numcommands * 2));
+	int vertex_index = 0;
+
+	sceGuDisable(GU_TEXTURE_2D);
+
+	while (1)
+	{
+       // get the vertex count and primitive type
+		int prim;
+		count = *order++;
+
+		if (!count) break;
+
+		if (count < 0)
+			count = -count;
+
+		for (int start = vertex_index; vertex_index < (start + count * 2); ++vertex_index, ++order, ++verts1, ++verts2)
+		{
+			// texture coordinates come from the draw list
+			out[vertex_index].uvs = order[0];
+			out[vertex_index].xyz = ((int*)verts1->v)[0];
+
+			// morph vert
+			++vertex_index;
+			out[vertex_index].uvs = order[0];
+			out[vertex_index].xyz = ((int*)verts2->v)[0];			
+		}
+
+		sceGuMorphWeight(0, 1.f - blend);
+		sceGuMorphWeight(1, blend);
+
+        sceGumDrawArray(GU_LINE_STRIP, GU_TEXTURE_16BIT | GU_VERTEX_8BIT | GU_VERTICES(2), count, 0, &out[vertex_index - count * 2]);
+	}
+
+    sceGuEnable(GU_TEXTURE_2D);
+}
+
+/*
+=============
 GL_DrawAliasFrame
 =============
 */
 extern vec3_t lightcolor; // LordHavoc: .lit support
 void GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, float apitch, float ayaw)
 {
+	if (r_showtris.value)
+	{
+		GL_DrawAliasBlendedWireFrame(paliashdr, posenum, posenum, 0);
+		return;
+	}
+
 	float 	l;
 	trivertx_t	*verts;
 	int		*order;
 	int		count;
 	float     r,g,b;
-//	vec3_t		l_v;
 
     lastposenum = posenum;
 
@@ -610,6 +683,18 @@ void GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, float apitch, float 
 	verts += posenum * paliashdr->poseverts;
 
 	order = (int *)((byte *)paliashdr + paliashdr->commands);
+	int numcommands = *order++;
+	
+	// Allocate the vertices.
+	struct vertex
+	{
+		int uvs;
+		unsigned int color;
+		int xyz;
+	};
+
+	vertex* const out = static_cast<vertex*>(sceGuGetMemory(sizeof(vertex) * numcommands));
+	int vertex_index = 0;
 
 	while (1)
 	{
@@ -617,40 +702,19 @@ void GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, float apitch, float 
 		count = *order++;
 		if (!count)
 			break;		// done
-		int prim;
+
+		int prim = GU_TRIANGLE_STRIP;
+
 		if (count < 0)
 		{
 			count = -count;
-
-			if (r_showtris.value)
-                prim = GU_LINE_STRIP;
-            else
-                prim = GU_TRIANGLE_FAN;
-		}
-		else
-		{
-		    if (r_showtris.value)
-                prim = GU_LINE_STRIP;
-            else
-                prim = GU_TRIANGLE_STRIP;;
+            prim = GU_TRIANGLE_FAN;
 		}
 
-		// Allocate the vertices.
-		struct vertex
-		{
-			int uvs;
-			unsigned int color;
-			char x, y, z;
-			char _padding;
-		};
-
-		vertex* const out = static_cast<vertex*>(sceGuGetMemory(sizeof(vertex) * count));
-
-		for (int vertex_index = 0; vertex_index < count; ++vertex_index)
+		for (int start = vertex_index; vertex_index < (start + count); ++vertex_index, ++order, ++verts)
 		{
 			// texture coordinates come from the draw list
 			out[vertex_index].uvs = order[0];
-			order += 1;
 
 			// normals and vertexes come from the frame list
 
@@ -710,30 +774,16 @@ void GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, float apitch, float 
             if (b > 1.0f)
                 b = 1.0f;
 
-			out[vertex_index].x = verts->v[0];
-			out[vertex_index].y = verts->v[1];
-			out[vertex_index].z = verts->v[2];
+			out[vertex_index].xyz = ((int*)verts->v)[0];
 
-            if (!r_showtris.value)
 #ifdef SUPPORTS_KUROK_PROTOCOL
-                out[vertex_index].color = GU_COLOR(r, g, b, currententity->alpha);
+            out[vertex_index].color = GU_COLOR(r, g, b, currententity->alpha);
 #else
-				out[vertex_index].color = GU_COLOR(r, g, b, 1);
+			out[vertex_index].color = GU_COLOR(r, g, b, 1);
 #endif
-            else
-                out[vertex_index].color = 0xffffffff;
-
-			++verts;
 		}
 
-		if (r_showtris.value)
-		{
-		    sceGuDisable(GU_TEXTURE_2D);
-            sceGumDrawArray(prim, GU_TEXTURE_16BIT | GU_VERTEX_8BIT | GU_COLOR_8888, count, 0, out);
-            sceGuEnable(GU_TEXTURE_2D);
-		}
-        else
-            sceGuDrawArray(prim, GU_TEXTURE_16BIT | GU_VERTEX_8BIT | GU_COLOR_8888, count, 0, out);
+        sceGuDrawArray(prim, GU_TEXTURE_16BIT | GU_VERTEX_8BIT | GU_COLOR_8888, count, 0, &out[vertex_index - count]);
 	}
 }
 
@@ -746,13 +796,18 @@ fenix@io.com: model animation interpolation
 */
 void GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, float blend, float apitch, float ayaw)
 {
+	if (r_showtris.value)
+	{
+		GL_DrawAliasBlendedWireFrame(paliashdr, pose1, pose2, blend);
+		return;
+	}
+
 	float       l;
     float       r,g,b;
 	trivertx_t* verts1;
 	trivertx_t* verts2;
 	int*        order;
 	int         count, brightness;
-	vec3_t      d;
 
 	lastposenum0 = pose1;
 	lastposenum  = pose2;
@@ -765,10 +820,22 @@ void GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, floa
 
 	order = (int *)((byte *)paliashdr + paliashdr->commands);
 
+	int numcommands = *order++;
+
+	// Allocate the vertices.
+	struct vertex
+	{
+		int uvs; // packed two shorts, easier to handle as int from order
+		unsigned int color;
+		int xyz;
+	};
+	vertex* const out = static_cast<vertex*>(sceGuGetMemory(sizeof(vertex) * numcommands * 2));
+	int vertex_index = 0;
+
 	while (1)
 	{
        // get the vertex count and primitive type
-		int prim;
+		int prim = GU_TRIANGLE_STRIP;
 		count = *order++;
 
 		if (!count) break;
@@ -776,37 +843,14 @@ void GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, floa
 		if (count < 0)
         {
 			count = -count;
-
-			if (r_showtris.value)
-                prim = GU_LINE_STRIP;
-            else
-                prim = GU_TRIANGLE_FAN;
-		}
-		else
-		{
-		    if (r_showtris.value)
-                prim = GU_LINE_STRIP;
-            else
-                prim = GU_TRIANGLE_STRIP;;
+            prim = GU_TRIANGLE_FAN;
 		}
 
-		// Allocate the vertices.
-		struct vertex
-		{
-			int uvs; // packed two shorts, easier to handle as int from order
-			unsigned int color;
-			char x, y, z;
-			char _padding;
-		};
-
-		vertex* const out = static_cast<vertex*>(sceGuGetMemory(sizeof(vertex) * count));
-
-		for (int vertex_index = 0; vertex_index < count; ++vertex_index)
+		for (int start = vertex_index; vertex_index < (start + count * 2); ++vertex_index, ++order, ++verts1, ++verts2)
 		{
 			// texture coordinates come from the draw list
 			out[vertex_index].uvs = order[0];
-			order += 1;
-
+	
 			// normals and vertexes come from the frame list
 			// blend the light intensity from the two frames together
 
@@ -853,36 +897,28 @@ void GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, floa
             if (b > 1.0f)
                 b = 1.0f;
 
-			VectorSubtract(verts2->v, verts1->v, d);
-			// blend the vertex positions from each frame together
-            out[vertex_index].x = verts1->v[0] + (blend * d[0]);
-            out[vertex_index].y = verts1->v[1] + (blend * d[1]);
-            out[vertex_index].z = verts1->v[2] + (blend * d[2]);
+			out[vertex_index].xyz = ((int*)verts1->v)[0];
 
-            if (!r_showtris.value)
 #ifdef SUPPORTS_KUROK_PROTOCOL
-                out[vertex_index].color = GU_COLOR(r, g, b, currententity->alpha);
+            out[vertex_index].color = GU_COLOR(r, g, b, currententity->alpha);
 #else
-                out[vertex_index].color = GU_COLOR(r, g, b, 1);
+            out[vertex_index].color = GU_COLOR(r, g, b, 1);
 #endif
-            else
-                out[vertex_index].color = 0xffffffff;
 
 //			byte colorval = ((int) (l*brightness)) & 0xFF;
 //			out[vertex_index].color = (colorval << 24) | (colorval << 16) | (colorval << 8) | colorval;
 
-            verts1++;
-            verts2++;
+			// morph vert
+			++vertex_index;
+			out[vertex_index].uvs = order[0];
+			out[vertex_index].color = out[vertex_index - 1].color;
+			out[vertex_index].xyz = ((int*)verts2->v)[0];			
 		}
 
-        if (r_showtris.value)
-		{
-		    sceGuDisable(GU_TEXTURE_2D);
-            sceGumDrawArray(prim, GU_TEXTURE_16BIT | GU_VERTEX_8BIT | GU_COLOR_8888, count, 0, out);
-            sceGuEnable(GU_TEXTURE_2D);
-		}
-		else
-            sceGuDrawArray(prim, GU_TEXTURE_16BIT | GU_VERTEX_8BIT | GU_COLOR_8888, count, 0, out);
+		sceGuMorphWeight(0, 1.f - blend);
+		sceGuMorphWeight(1, blend);
+
+        sceGuDrawArray(prim, GU_TEXTURE_16BIT | GU_VERTEX_8BIT | GU_COLOR_8888 | GU_VERTICES(2), count, 0, &out[vertex_index - count * 2]);
 	}
 }
 
@@ -1002,59 +1038,44 @@ void R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t* ent, 
 		frame = 0;
 	}
 
-	// HACK: if we're a certain distance away, don't bother blending
-	// motolegacy -- Lets not care about Z (up).. chances are they're out of the frustum anyway
-	int dist_x = (cl.viewent.origin[0] - ent->origin[0]);
-	int dist_y = (cl.viewent.origin[1] - ent->origin[1]);
-	int distance_from_client = (int)((dist_x) * (dist_x) + (dist_y) * (dist_y)); // no use sqrting, just slows us down.
+	pose = paliashdr->frames[frame].firstpose;
+	numposes = paliashdr->frames[frame].numposes;
 
-	// They're too far away from us to care about blending their frames.
-	if (distance_from_client >= 40000) { // 200 * 200
-		// Fix them from jumping from last lerp
-		ent->currpose = ent->lastpose = paliashdr->frames[frame].firstpose;
-		ent->frame_interval = 0.1;
-
-		GL_DrawAliasFrame (paliashdr, paliashdr->frames[frame].firstpose, apitch, ayaw);
-	} else {
-		pose = paliashdr->frames[frame].firstpose;
-		numposes = paliashdr->frames[frame].numposes;
-
-		if (numposes > 1)
-		{
-			ent->frame_interval = paliashdr->frames[frame].interval;
-			pose += (int)(cl.time / ent->frame_interval) % numposes;
-		}
-		else
-		{
-	// One tenth of a second is a good for most Quake animations.
-	// If the nextthink is longer then the animation is usually meant to pause
-	// (e.g. check out the shambler magic animation in shambler.qc). If its
-	// shorter then things will still be smoothed partly, and the jumps will be
-	// less noticable because of the shorter time. So, this is probably a good assumption.
-			ent->frame_interval = 0.1;
-		}
-
-		if (ent->currpose != pose)
-		{
-			ent->frame_start_time = cl.time;
-			ent->lastpose = ent->currpose;
-			ent->currpose = pose;
-			blend = 0;
-		}
-		else
-		{
-			blend = (cl.time - ent->frame_start_time) / ent->frame_interval;
-		}
-
-		// weird things start happening if blend passes 1
-		if (cl.paused || blend > 1)
-			blend = 1;
-
-		if (blend == 1)
-			GL_DrawAliasFrame (paliashdr, pose, apitch, ayaw);
-		else
-			GL_DrawAliasBlendedFrame (paliashdr, ent->lastpose, ent->currpose, blend, apitch, ayaw);
+	if (numposes > 1)
+	{
+		ent->frame_interval = paliashdr->frames[frame].interval;
+		pose += (int)(cl.time / ent->frame_interval) % numposes;
 	}
+	else
+	{
+		// One tenth of a second is a good for most Quake animations.
+		// If the nextthink is longer then the animation is usually meant to pause
+		// (e.g. check out the shambler magic animation in shambler.qc). If its
+		// shorter then things will still be smoothed partly, and the jumps will be
+		// less noticable because of the shorter time. So, this is probably a good assumption.
+		ent->frame_interval = 0.1;
+	}
+
+	if (ent->currpose != pose)
+	{
+		ent->frame_start_time = cl.time;
+		ent->lastpose = ent->currpose;
+		ent->currpose = pose;
+		blend = 0;
+	}
+	else
+	{
+		blend = (cl.time - ent->frame_start_time) / ent->frame_interval;
+	}
+
+	// weird things start happening if blend passes 1
+	if (cl.paused || blend > 1)
+		blend = 1;
+
+	if (blend == 1)
+		GL_DrawAliasFrame (paliashdr, pose, apitch, ayaw);
+	else
+		GL_DrawAliasBlendedFrame (paliashdr, ent->lastpose, ent->currpose, blend, apitch, ayaw);
 }
 
 /*

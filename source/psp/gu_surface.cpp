@@ -1029,8 +1029,6 @@ void R_DrawBrushModel (entity_t *ent)
 		}
 	}
 	
-
-
 	R_BlendLightmaps ();
 
 	clipping::end_brush_model();
@@ -1052,7 +1050,7 @@ void R_DrawBrushModel (entity_t *ent)
 R_RecursiveWorldNode
 ================
 */
-void R_RecursiveWorldNode (mnode_t *node)
+void R_RecursiveWorldNode (mnode_t *node, bool nofrustumcheck)
 {
 	int			c, side;
 //	vec3_t		acceptpt, rejectpt;
@@ -1067,7 +1065,9 @@ void R_RecursiveWorldNode (mnode_t *node)
 
 	if (node->visframe != r_visframecount)
 		return;
-	int frustum_check = R_FrustumCheck (node->minmaxs, node->minmaxs+3);
+
+	int frustum_check = nofrustumcheck ? 0 : R_FrustumCheck (node->minmaxs, node->minmaxs+3);
+
 	if (frustum_check < 0)
 		return;
 
@@ -1119,7 +1119,7 @@ void R_RecursiveWorldNode (mnode_t *node)
 	side = (dot >= 0) ? 0 : 1;
 
 // recurse down the children, front side first
-	R_RecursiveWorldNode (node->children[side]);
+	R_RecursiveWorldNode (node->children[side], !frustum_check);
 
 // draw stuff
 	c = node->numsurfaces;
@@ -1169,7 +1169,7 @@ void R_RecursiveWorldNode (mnode_t *node)
 	}
 
 // recurse down the back side
-	R_RecursiveWorldNode (node->children[!side]);
+	R_RecursiveWorldNode (node->children[!side], !frustum_check);
 }
 
 extern char	skybox_name[32];
@@ -1199,7 +1199,7 @@ void R_DrawWorld (void)
 	R_ClearSkyBox ();
 //#endif
 
-	R_RecursiveWorldNode (cl.worldmodel->nodes);
+	R_RecursiveWorldNode (cl.worldmodel->nodes, false);
 
 	DrawTextureChains ();
 

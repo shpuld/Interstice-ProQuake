@@ -273,3 +273,5 @@ typedef struct {
 psp_particle* D_CreateBuffer (int size);
 void 	  	  D_DeleteBuffer (psp_particle* vertices);
 int 	      D_DrawParticleBuffered (psp_particle* vertices, particle_t *pparticle, vec3_t up, vec3_t right, float scale);
+
+void R_CalculatePspVertexNormals ();

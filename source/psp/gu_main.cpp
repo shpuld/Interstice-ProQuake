@@ -560,6 +560,7 @@ extern "C" float	r_avertexnormals[NUMVERTEXNORMALS][3];
 float r_avertexnormals[NUMVERTEXNORMALS][3] = {
 #include "../anorms.h"
 };
+char r_avertexnormalspsp[NUMVERTEXNORMALS][3];
 
 vec3_t	shadevector;
 float	shadelight, ambientlight; // LordHavoc: .lit support, removed shadelight and ambientlight
@@ -588,6 +589,18 @@ float old_i_model_transform;
 // vertex lighting
 float	apitch, ayaw;
 vec3_t	vertexlight;
+
+
+// shpuld: need normals in signed 8bit per axis format for psp hw lights etc
+void R_CalculatePspVertexNormals ()
+{
+	for (int i = 0; i < NUMVERTEXNORMALS; i++)
+	{
+		for (int j = 0; j < 3; j++)
+			r_avertexnormalspsp[i][j] = r_avertexnormals[i][j] * 255 - 128;
+	}
+}
+
 
 /*
 =============
@@ -662,7 +675,7 @@ void GL_DrawAliasBlendedWireFrame (aliashdr_t *paliashdr, int pose1, int pose2, 
 GL_DrawAliasFrame
 =============
 */
-extern vec3_t lightcolor; // LordHavoc: .lit support
+
 void GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, float apitch, float ayaw)
 {
 	if (r_showtris.value)
@@ -685,16 +698,14 @@ void GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, float apitch, float 
 	order = (int *)((byte *)paliashdr + paliashdr->commands);
 	int numcommands = *order++;
 	
-	// Allocate the vertices.
 	struct vertex
 	{
-		int uvs;
-		unsigned int color;
-		int xyz;
+		short u, v;
+		char nx, ny, nz, x, y, z;
 	};
-
-	vertex* const out = static_cast<vertex*>(sceGuGetMemory(sizeof(vertex) * numcommands));
-	int vertex_index = 0;
+	int vertexsize = 10; // 4 + 3 + 3
+	char* const out = static_cast<char*>(sceGuGetMemory(vertexsize * numcommands));
+	char* current_pos = out;
 
 	while (1)
 	{
@@ -711,79 +722,25 @@ void GL_DrawAliasFrame (aliashdr_t *paliashdr, int posenum, float apitch, float 
             prim = GU_TRIANGLE_FAN;
 		}
 
-		for (int start = vertex_index; vertex_index < (start + count); ++vertex_index, ++order, ++verts)
+		char * verts_start = current_pos;
+	
+		for (int i = 0; i < count; ++i, ++order, ++verts)
 		{
+			vertex * ov = (vertex*)current_pos;
 			// texture coordinates come from the draw list
-			out[vertex_index].uvs = order[0];
+			ov->u = ((short*)order)[0];
+			ov->v = ((short*)order)[1];
+			ov->nx = r_avertexnormalspsp[verts->lightnormalindex][0];
+			ov->ny = r_avertexnormalspsp[verts->lightnormalindex][1];
+			ov->nz = r_avertexnormalspsp[verts->lightnormalindex][2];
+			ov->x = verts->v[0];
+			ov->y = verts->v[1];
+			ov->z = verts->v[2];
 
-			// normals and vertexes come from the frame list
-
-			// LordHavoc: .lit support begin
-			//l = shadedots[verts->lightnormalindex] * shadelight; // LordHavoc: original code
-			//l = shadedots[verts->lightnormalindex];
-			// LordHavoc: .lit support end
-
-			// normals and vertexes come from the frame list
-			// blend the light intensity from the two frames together
-
-            if(vlight.value)
-                // RIOT - Vertex lighting
-                l = VLight_GetLightValue(verts->lightnormalindex, apitch, ayaw);
-            else
-            {
-                float l1, l2, diff;
-
-                l1 = shadedots[verts->lightnormalindex]; 				// Colored Lighting support
-                l2 = shadedots2[verts->lightnormalindex];
-
-                if (l1 != l2)
-                {
-                    if (l1 > l2)
-                    {
-                        diff = l1 - l2;
-                        diff *= lightlerpoffset;
-                        l = l1 - diff;
-                    }
-                    else
-                    {
-                        diff = l2 - l1;
-                        diff *= lightlerpoffset;
-                        l = l1 + diff;
-                    }
-                }
-                else
-                    l = l1;
-            }
-
-			if (r_model_contrast.value)
-				l *= l;
-
-//			if (l > 1.5)
-//				l = 1.5;
-
-            r = l * lightcolor[0];
-            g = l * lightcolor[1];
-            b = l * lightcolor[2];
-
-            // PSP handles colors in bytes, so can't go anything higher then 1.0f)
-            // TODO: Use hardware lights to overbright the models, instead of using another pass.
-            if (r > 1.0f)
-                r = 1.0f;
-            if (g > 1.0f)
-                g = 1.0f;
-            if (b > 1.0f)
-                b = 1.0f;
-
-			out[vertex_index].xyz = ((int*)verts->v)[0];
-
-#ifdef SUPPORTS_KUROK_PROTOCOL
-            out[vertex_index].color = GU_COLOR(r, g, b, currententity->alpha);
-#else
-			out[vertex_index].color = GU_COLOR(r, g, b, 1);
-#endif
+			current_pos += vertexsize;
 		}
 
-        sceGuDrawArray(prim, GU_TEXTURE_16BIT | GU_VERTEX_8BIT | GU_COLOR_8888, count, 0, &out[vertex_index - count]);
+        sceGuDrawArray(prim, GU_TEXTURE_16BIT | GU_VERTEX_8BIT | GU_NORMAL_8BIT, count, 0, verts_start);
 	}
 }
 
@@ -825,12 +782,21 @@ void GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, floa
 	// Allocate the vertices.
 	struct vertex
 	{
-		int uvs; // packed two shorts, easier to handle as int from order
-		unsigned int color;
-		int xyz;
+		short u, v;
+		// short color;
+		char nx, ny, nz, x, y, z;
 	};
-	vertex* const out = static_cast<vertex*>(sceGuGetMemory(sizeof(vertex) * numcommands * 2));
-	int vertex_index = 0;
+	int vertexsize = 10; // 4 + 3 + 3
+	char* const out = static_cast<char*>(sceGuGetMemory(vertexsize * numcommands * 2));
+	char* current_pos = out;
+
+	#ifdef SUPPORTS_KUROK_PROTOCOL
+	// replace with sceGuColor
+    // out[vertex_index].color = GU_COLOR(r, g, b, currententity->alpha);
+	#endif
+
+	sceGuMorphWeight(0, 1.f - blend);
+	sceGuMorphWeight(1, blend);
 
 	while (1)
 	{
@@ -846,79 +812,38 @@ void GL_DrawAliasBlendedFrame (aliashdr_t *paliashdr, int pose1, int pose2, floa
             prim = GU_TRIANGLE_FAN;
 		}
 
-		for (int start = vertex_index; vertex_index < (start + count * 2); ++vertex_index, ++order, ++verts1, ++verts2)
-		{
-			// texture coordinates come from the draw list
-			out[vertex_index].uvs = order[0];
+		char * verts_start = current_pos;
 	
-			// normals and vertexes come from the frame list
-			// blend the light intensity from the two frames together
+		for (int i = 0; i < count; ++i, ++order, ++verts1, ++verts2)
+		{
+			vertex * ov = (vertex*)current_pos;
+			// texture coordinates come from the draw list
+			ov->u = ((short*)order)[0];
+			ov->v = ((short*)order)[1];
+			ov->nx = r_avertexnormalspsp[verts1->lightnormalindex][0];
+			ov->ny = r_avertexnormalspsp[verts1->lightnormalindex][1];
+			ov->nz = r_avertexnormalspsp[verts1->lightnormalindex][2];
+			ov->x = verts1->v[0];
+			ov->y = verts1->v[1];
+			ov->z = verts1->v[2];
 
-			if(vlight.value)
-			    // RIOT - Vertex lighting
-                l = VLight_LerpLight(verts1->lightnormalindex, verts2->lightnormalindex, blend, apitch, ayaw);
-            else
-            {
-                float l1, l2, diff;
-
-                l1 = shadedots[verts1->lightnormalindex]; 				// Colored Lighting support
-                l2 = shadedots2[verts1->lightnormalindex];
-
-                if (l1 != l2)
-                {
-                    if (l1 > l2)
-                    {
-                        diff = l1 - l2;
-                        diff *= lightlerpoffset;
-                        l = l1 - diff;
-                    }
-                    else
-                    {
-                        diff = l2 - l1;
-                        diff *= lightlerpoffset;
-                        l = l1 + diff;
-                    }
-                }
-                else
-                    l = l1;
-            }
-			// light contrast - pox@planetquake.com
-			if (r_model_contrast.value)
-				l *= l;
-
-            r = l * lightcolor[0];
-            g = l * lightcolor[1];
-            b = l * lightcolor[2];
-
-            if (r > 1.0f)
-                r = 1.0f;
-            if (g > 1.0f)
-                g = 1.0f;
-            if (b > 1.0f)
-                b = 1.0f;
-
-			out[vertex_index].xyz = ((int*)verts1->v)[0];
-
-#ifdef SUPPORTS_KUROK_PROTOCOL
-            out[vertex_index].color = GU_COLOR(r, g, b, currententity->alpha);
-#else
-            out[vertex_index].color = GU_COLOR(r, g, b, 1);
-#endif
-
-//			byte colorval = ((int) (l*brightness)) & 0xFF;
-//			out[vertex_index].color = (colorval << 24) | (colorval << 16) | (colorval << 8) | colorval;
+			current_pos += vertexsize;
+			ov = (vertex*)current_pos;
 
 			// morph vert
-			++vertex_index;
-			out[vertex_index].uvs = order[0];
-			out[vertex_index].color = out[vertex_index - 1].color;
-			out[vertex_index].xyz = ((int*)verts2->v)[0];			
+			ov->u = ((short*)order)[0];
+			ov->v = ((short*)order)[1];
+			ov->nx = r_avertexnormalspsp[verts2->lightnormalindex][0];
+			ov->ny = r_avertexnormalspsp[verts2->lightnormalindex][1];
+			ov->nz = r_avertexnormalspsp[verts2->lightnormalindex][2];
+			ov->x = verts2->v[0];
+			ov->y = verts2->v[1];
+			ov->z = verts2->v[2];
+
+			current_pos += vertexsize;
 		}
 
-		sceGuMorphWeight(0, 1.f - blend);
-		sceGuMorphWeight(1, blend);
-
-        sceGuDrawArray(prim, GU_TEXTURE_16BIT | GU_VERTEX_8BIT | GU_COLOR_8888 | GU_VERTICES(2), count, 0, &out[vertex_index - count * 2]);
+        sceGuDrawArray(prim, GU_TEXTURE_16BIT | GU_VERTEX_8BIT | GU_NORMAL_8BIT | GU_VERTICES(2), count, 0, verts_start);
 	}
 }
 
@@ -1077,6 +1002,23 @@ void R_SetupAliasBlendedFrame (int frame, aliashdr_t *paliashdr, entity_t* ent, 
 	else
 		GL_DrawAliasBlendedFrame (paliashdr, ent->lastpose, ent->currpose, blend, apitch, ayaw);
 }
+
+
+extern vec3_t lightcolor; // LordHavoc: .lit support
+
+void GL_SetupAliasLight (bool fullbright)
+{
+	sceGuEnable(GU_LIGHTING);
+	sceGuEnable(GU_LIGHT0);
+
+	unsigned int ambient = fullbright ? 0xffffffff : GU_COLOR(lightcolor[0] * 0.7f, lightcolor[1] * 0.7f, lightcolor[2] * 0.7f, 1.0f);
+	unsigned int diffuse = fullbright ? 0xffffffff : GU_COLOR(lightcolor[0] * 1.0f, lightcolor[1] * 1.0f, lightcolor[2] * 1.0f, 1.0f);
+	ScePspFVector3 pos = { 0.0f, 0.5f, 0.866f };
+	sceGuLight(0, GU_DIRECTIONAL, GU_AMBIENT_AND_DIFFUSE, &pos);
+	sceGuLightColor(0, GU_AMBIENT, ambient);
+	sceGuLightColor(0, GU_DIFFUSE, diffuse);
+}
+
 
 /*
 =================
@@ -1238,6 +1180,12 @@ void R_DrawAliasModel (entity_t *ent)
 		filter = true;
 	}
 
+	/* 
+	 * shpuld: note, alphafunc stuff doesn't seem to work correctly with 
+	 * this is kurok specific stuff, which isn't fully supported anyway.
+	 * need to figure out why sceGuColor is not enough to give verts alpha
+	 * to pass alpha test. might need to simply just give em a 16bit vert color
+	 */
 	if (!strcmp (clmodel->name, "progs/raptor.mdl") ||
         !strcmp (clmodel->name, "progs/5_box_s.mdl") ||
 	    !strcmp (clmodel->name, "progs/trex.mdl"))
@@ -1245,25 +1193,14 @@ void R_DrawAliasModel (entity_t *ent)
 		alphafunc = true;
 	}
 
-	if (!strcmp (clmodel->name, "progs/v_axe.mdl") ||
-	    !strcmp (clmodel->name, "progs/v_axea.mdl") ||
-	    !strcmp (clmodel->name, "progs/v_bow.mdl") ||
-	    !strcmp (clmodel->name, "progs/v_tekbow.mdl") ||
-	    !strcmp (clmodel->name, "progs/v_shot.mdl") ||
-	    !strcmp (clmodel->name, "progs/v_shot2.mdl") ||
-	    !strcmp (clmodel->name, "progs/v_nail.mdl") ||
-	    !strcmp (clmodel->name, "progs/v_nail2.mdl") ||
-	    !strcmp (clmodel->name, "progs/v_rock.mdl") ||
-	    !strcmp (clmodel->name, "progs/v_rock2.mdl") ||
-	    !strcmp (clmodel->name, "progs/v_light.mdl") ||
-	    !strcmp (clmodel->name, "progs/v_uzi.mdl") ||
+	if (ent == &cl.viewent ||
 	    !strcmp (clmodel->name, "progs/v_sniper.mdl") ||
 	    !strcmp (clmodel->name, "progs/crate.mdl") ||
 	    !strcmp (clmodel->name, "progs/pc.mdl"))
 	{
+		// alphafunc2 = true;
         if (r_model_brightness.value)
 			fixlight = true;
-			alphafunc2 = true;
 	}
 
 	if (lightcolor[0] < 16)
@@ -1282,41 +1219,10 @@ void R_DrawAliasModel (entity_t *ent)
 		    force_fullbright = true;
 	}
 
-	// LordHavoc: .lit support end
-
-	// light lerping - pox@planetquake.com
-	//shadedots = r_avertexnormal_dots[((int)(e->angles[1] * (SHADEDOT_QUANT / 360.0))) & (SHADEDOT_QUANT - 1)];
-
-    {
-		float ang_ceil, ang_floor;
-
-		// add pitch angle so lighting changes when looking up/down (mainly for viewmodel)
-    	lightlerpoffset = (ent->angles[1]+ent->angles[0]) * (SHADEDOT_QUANT / 360.0);
-
-	    ang_ceil = ceil(lightlerpoffset);
-    	ang_floor = floor(lightlerpoffset);
-
-    	lightlerpoffset = ang_ceil - lightlerpoffset;
-
-		shadedots = r_avertexnormal_dots[(int)ang_ceil & (SHADEDOT_QUANT - 1)];
-		shadedots2 = r_avertexnormal_dots[(int)ang_floor & (SHADEDOT_QUANT - 1)];
-    }
-
 	// LordHavoc: .lit support begin
 	//shadelight = shadelight / 200.0; // LordHavoc: original code
-	VectorScale(lightcolor, 1.0f / 200.0f, lightcolor);
+	VectorScale(lightcolor, 1.0f / 125.0f, lightcolor);
 	// LordHavoc: .lit support end
-
-    // light lerping - pox@planetquake.com
-
-//    shadelight = (shadelight + ent->last_shadelight)/2;
-//    ent->last_shadelight = shadelight;
-
-	an = ent->angles[1]/180*M_PI;
-	shadevector[0] = cosf(-an);
-	shadevector[1] = sinf(-an);
-	shadevector[2] = 1;
-	VectorNormalize (shadevector);
 
 	// locate the proper data
 	paliashdr = (aliashdr_t *)Mod_Extradata (ent->model);
@@ -1386,7 +1292,9 @@ void R_DrawAliasModel (entity_t *ent)
         sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA);
     }
     else
+	{
 		sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA);
+	}
 
 	if (IS_SUPERHOT)
 		sceGuShadeModel(GU_FLAT);
@@ -1395,15 +1303,22 @@ void R_DrawAliasModel (entity_t *ent)
 
 	sceGumUpdateMatrix();
 
-    if (r_interpolate_animation.value)
+	GL_SetupAliasLight(force_fullbright);
+	sceGuColor(0xffffffff);
+
+   	if (r_interpolate_animation.value)
         R_SetupAliasBlendedFrame (ent->frame, paliashdr, ent, ent->angles[0], ent->angles[1]);
     else
         R_SetupAliasFrame (ent->frame, paliashdr, ent->angles[0], ent->angles[1]);
+
+
+	sceGuDisable(GU_LIGHTING);
 
 	if (!force_fullbright && fixlight) //Draws another pass, ouch!
 	{
         sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_FIX, 0, 0xFFFFFFFF);
         sceGuEnable(GU_BLEND);
+		sceGuColor(GU_COLOR(lightcolor[0], lightcolor[1], lightcolor[2], 1.0f));
 
         if (r_interpolate_animation.value)
             R_SetupAliasBlendedFrame (ent->frame, paliashdr, ent, ent->angles[0], ent->angles[1]);
@@ -1421,7 +1336,7 @@ void R_DrawAliasModel (entity_t *ent)
 		sceGuDisable(GU_BLEND);
 	}
 
-	if (additive || filter || alphafunc)
+	if (additive || filter || alphafunc || alphafunc2)
 	{
 		sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
 		sceGuDisable(GU_BLEND);

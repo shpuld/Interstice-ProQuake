@@ -135,4 +135,4 @@ void Cache_Report (void);
 void Hunk_Print_f (void);
 void Hunk_Print (qboolean all);
 
-void* memcpy_vfpu(void* dst, void* src, unsigned int size);
+void memcpy_vfpu(void* dst, void* src, unsigned int size);

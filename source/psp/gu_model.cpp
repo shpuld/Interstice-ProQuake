@@ -715,18 +715,18 @@ void Mod_LoadLighting (lump_t *l)
 		return;
 	}
 
-        loadmodel->lightdata = static_cast<byte*>(Hunk_AllocName ( l->filelen*3, litfilename));
-        in = loadmodel->lightdata + l->filelen*2; // place the file at the end, so it will not be overwritten until the very last write
-        out = loadmodel->lightdata;
-        memcpy_vfpu(in, mod_base + l->fileofs, l->filelen);
-        for (i = 0;i < l->filelen;i++)
-        {
-            d = *in++;
-            *out++ = d;
-            *out++ = d;
-            *out++ = d;
-        }
-        // LordHavoc: .lit support end
+	loadmodel->lightdata = static_cast<byte*>(Hunk_AllocName ( l->filelen*3, litfilename));
+	in = loadmodel->lightdata + l->filelen*2; // place the file at the end, so it will not be overwritten until the very last write
+	out = loadmodel->lightdata;
+	memcpy_vfpu(in, mod_base + l->fileofs, l->filelen);
+	for (i = 0;i < l->filelen;i++)
+	{
+		d = *in++;
+		*out++ = d;
+		*out++ = d;
+		*out++ = d;
+	}
+	// LordHavoc: .lit support end
 
 }
 

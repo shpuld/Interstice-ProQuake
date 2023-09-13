@@ -49,340 +49,151 @@ typedef struct
 void Cache_FreeLow (int new_low_hunk);
 void Cache_FreeHigh (int new_high_hunk);
 
-void* memcpy_vfpu( void* dst, void* src, unsigned int size )
+//*****************************************************************************
+// memcpy_vfpu: lifted (and modified) from DaedalusX64 (gplv2), bless them
+// Uses VFPU if possible else normal memcpy() (orignal code by Alex? Modified by Corn)
+//*****************************************************************************
+
+void memcpy_vfpu(void* dst, void* src, unsigned int size)
 {
-	u8* src8 = (u8*)src;
-	u8* dst8 = (u8*)dst;
+    //less than 16bytes or there is no 32bit alignment -> not worth optimizing
+	if( ((unsigned int)src&0x3) != ((unsigned int)dst&0x3) || (size<16) )
+    {
+        memcpy(dst, src, size);
+        return;
+    }
 
-	// < 8 isn't worth trying any optimisations...
-	if (size<8) goto bytecopy;
+	byte* src8 = (byte*)src;
+    byte* dst8 = (byte*)dst;
 
-	// < 64 means we don't gain anything from using vfpu...
-	if (size<64)
+	// Align dst to 4 bytes or just resume if already done
+	while( ((unsigned int)dst8&0x3)!=0 )
 	{
-		// Align dst on 4 bytes or just resume if already done
-		while (((((u32)dst8) & 0x3)!=0) && size) {
-			*dst8++ = *src8++;
-			size--;
-		}
-		if (size<4) goto bytecopy;
-
-		// We are dst aligned now and >= 4 bytes to copy
-		u32* src32 = (u32*)src8;
-		u32* dst32 = (u32*)dst8;
-		switch(((u32)src8)&0x3)
-		{
-			case 0:
-				while (size&0xC)
-				{
-					*dst32++ = *src32++;
-					size -= 4;
-				}
-				if (size==0) return (dst);		// fast out
-				while (size>=16)
-				{
-					*dst32++ = *src32++;
-					*dst32++ = *src32++;
-					*dst32++ = *src32++;
-					*dst32++ = *src32++;
-					size -= 16;
-				}
-				if (size==0) return (dst);		// fast out
-				src8 = (u8*)src32;
-				dst8 = (u8*)dst32;
-				break;
-			default:
-				{
-					register u32 a, b, c, d;
-					while (size>=4)
-					{
-						a = *src8++;
-						b = *src8++;
-						c = *src8++;
-						d = *src8++;
-						*dst32++ = (d << 24) | (c << 16) | (b << 8) | a;
-						size -= 4;
-					}
-					if (size==0) return (dst);		// fast out
-					dst8 = (u8*)dst32;
-				}
-				break;
-		}
-		goto bytecopy;
-	}
-
-	// Align dst on 16 bytes to gain from vfpu aligned stores
-	while ((((u32)dst8) & 0xF)!=0 && size) {
 		*dst8++ = *src8++;
 		size--;
 	}
 
-	// We use uncached dst to use VFPU writeback and free cpu cache for src only
-	u8* udst8 = (u8*)((u32)dst8 | 0x40000000);
-	// We need the 64 byte aligned address to make sure the dcache is invalidated correctly
-	u8* dst64a = ((u32)dst8&~0x3F);
-	// Invalidate the first line that matches up to the dst start
-	if (size>=64)
-	asm(".set	push\n"					// save assembler option
-		".set	noreorder\n"			// suppress reordering
-		"cache 0x1B, 0(%0)\n"
-		"addiu	%0, %0, 64\n"
-		"sync\n"
-		".set	pop\n"
-		:"+r"(dst64a));
-	switch(((u32)src8&0xF))
+	unsigned int *dst32=(unsigned int*)dst8;
+	unsigned int *src32=(unsigned int*)src8;
+
+	// Align dst to 16 bytes or just resume if already done
+	while( ((unsigned int)dst32&0xF)!=0 )
 	{
-		// src aligned on 16 bytes too? nice!
-		case 0:
-			while (size>=64)
-			{
-				asm(".set	push\n"					// save assembler option
-					".set	noreorder\n"			// suppress reordering
-					"cache	0x1B,  0(%2)\n"			// Dcache writeback invalidate
-					"lv.q	c000,  0(%1)\n"
-					"lv.q	c010, 16(%1)\n"
-					"lv.q	c020, 32(%1)\n"
-					"lv.q	c030, 48(%1)\n"
-					"sync\n"						// Wait for allegrex writeback
-					"sv.q	c000,  0(%0), wb\n"
-					"sv.q	c010, 16(%0), wb\n"
-					"sv.q	c020, 32(%0), wb\n"
-					"sv.q	c030, 48(%0), wb\n"
-					// Lots of variable updates... but get hidden in sv.q latency anyway
-					"addiu  %3, %3, -64\n"
-					"addiu	%2, %2, 64\n"
-					"addiu	%1, %1, 64\n"
-					"addiu	%0, %0, 64\n"
-					".set	pop\n"					// restore assembler option
-					:"+r"(udst8),"+r"(src8),"+r"(dst64a),"+r"(size)
-					:
-					:"memory"
-					);
-			}
-			if (size>16)
-			{
-				// Invalidate the last cache line where the max remaining 63 bytes are
-				asm(".set	push\n"					// save assembler option
-					".set	noreorder\n"			// suppress reordering
-					"cache	0x1B, 0(%0)\n"
-					"sync\n"
-					".set	pop\n"					// restore assembler option
-					::"r"(dst64a));
-				while (size>=16)
-				{
-					asm(".set	push\n"					// save assembler option
-						".set	noreorder\n"			// suppress reordering
-						"lv.q	c000, 0(%1)\n"
-						"sv.q	c000, 0(%0), wb\n"
-						// Lots of variable updates... but get hidden in sv.q latency anyway
-						"addiu	%2, %2, -16\n"
-						"addiu	%1, %1, 16\n"
-						"addiu	%0, %0, 16\n"
-						".set	pop\n"					// restore assembler option
-						:"+r"(udst8),"+r"(src8),"+r"(size)
-						:
-						:"memory"
-						);
-				}
-			}
-			asm(".set	push\n"					// save assembler option
-				".set	noreorder\n"			// suppress reordering
-				"vflush\n"						// Flush VFPU writeback cache
-				".set	pop\n"					// restore assembler option
-				);
-			dst8 = (u8*)((u32)udst8 & ~0x40000000);
-			break;
-		// src is only qword unaligned but word aligned? We can at least use ulv.q
-		case 4:
-		case 8:
-		case 12:
-			while (size>=64)
-			{
-				asm(".set	push\n"					// save assembler option
-					".set	noreorder\n"			// suppress reordering
-					"cache	0x1B,  0(%2)\n"			// Dcache writeback invalidate
-					"ulv.q	c000,  0(%1)\n"
-					"ulv.q	c010, 16(%1)\n"
-					"ulv.q	c020, 32(%1)\n"
-					"ulv.q	c030, 48(%1)\n"
-					"sync\n"						// Wait for allegrex writeback
-					"sv.q	c000,  0(%0), wb\n"
-					"sv.q	c010, 16(%0), wb\n"
-					"sv.q	c020, 32(%0), wb\n"
-					"sv.q	c030, 48(%0), wb\n"
-					// Lots of variable updates... but get hidden in sv.q latency anyway
-					"addiu  %3, %3, -64\n"
-					"addiu	%2, %2, 64\n"
-					"addiu	%1, %1, 64\n"
-					"addiu	%0, %0, 64\n"
-					".set	pop\n"					// restore assembler option
-					:"+r"(udst8),"+r"(src8),"+r"(dst64a),"+r"(size)
-					:
-					:"memory"
-					);
-			}
-			if (size>16)
-			// Invalidate the last cache line where the max remaining 63 bytes are
-			asm(".set	push\n"					// save assembler option
-				".set	noreorder\n"			// suppress reordering
-				"cache	0x1B, 0(%0)\n"
-				"sync\n"
-				".set	pop\n"					// restore assembler option
-				::"r"(dst64a));
-			while (size>=16)
-			{
-				asm(".set	push\n"					// save assembler option
-					".set	noreorder\n"			// suppress reordering
-					"ulv.q	c000, 0(%1)\n"
-					"sv.q	c000, 0(%0), wb\n"
-					// Lots of variable updates... but get hidden in sv.q latency anyway
-					"addiu	%2, %2, -16\n"
-					"addiu	%1, %1, 16\n"
-					"addiu	%0, %0, 16\n"
-					".set	pop\n"					// restore assembler option
-					:"+r"(udst8),"+r"(src8),"+r"(size)
-					:
-					:"memory"
-					);
-			}
-			asm(".set	push\n"					// save assembler option
-				".set	noreorder\n"			// suppress reordering
-				"vflush\n"						// Flush VFPU writeback cache
-				".set	pop\n"					// restore assembler option
-				);
-			dst8 = (u8*)((u32)udst8 & ~0x40000000);
-			break;
-		// src not aligned? too bad... have to use unaligned reads
-		default:
-			while (size>=64)
-			{
-				asm(".set	push\n"					// save assembler option
-					".set	noreorder\n"			// suppress reordering
-					"cache 0x1B,  0(%2)\n"
-
-					"lwr	 $8,  0(%1)\n"			//
-					"lwl	 $8,  3(%1)\n"			// $8  = *(s + 0)
-					"lwr	 $9,  4(%1)\n"			//
-					"lwl	 $9,  7(%1)\n"			// $9  = *(s + 4)
-					"lwr	$10,  8(%1)\n"			//
-					"lwl	$10, 11(%1)\n"			// $10 = *(s + 8)
-					"lwr	$11, 12(%1)\n"			//
-					"lwl	$11, 15(%1)\n"			// $11 = *(s + 12)
-					"mtv	 $8, s000\n"
-					"mtv	 $9, s001\n"
-					"mtv	$10, s002\n"
-					"mtv	$11, s003\n"
-
-					"lwr	 $8, 16(%1)\n"
-					"lwl	 $8, 19(%1)\n"
-					"lwr	 $9, 20(%1)\n"
-					"lwl	 $9, 23(%1)\n"
-					"lwr	$10, 24(%1)\n"
-					"lwl	$10, 27(%1)\n"
-					"lwr	$11, 28(%1)\n"
-					"lwl	$11, 31(%1)\n"
-					"mtv	 $8, s010\n"
-					"mtv	 $9, s011\n"
-					"mtv	$10, s012\n"
-					"mtv	$11, s013\n"
-
-					"lwr	 $8, 32(%1)\n"
-					"lwl	 $8, 35(%1)\n"
-					"lwr	 $9, 36(%1)\n"
-					"lwl	 $9, 39(%1)\n"
-					"lwr	$10, 40(%1)\n"
-					"lwl	$10, 43(%1)\n"
-					"lwr	$11, 44(%1)\n"
-					"lwl	$11, 47(%1)\n"
-					"mtv	 $8, s020\n"
-					"mtv	 $9, s021\n"
-					"mtv	$10, s022\n"
-					"mtv	$11, s023\n"
-
-					"lwr	 $8, 48(%1)\n"
-					"lwl	 $8, 51(%1)\n"
-					"lwr	 $9, 52(%1)\n"
-					"lwl	 $9, 55(%1)\n"
-					"lwr	$10, 56(%1)\n"
-					"lwl	$10, 59(%1)\n"
-					"lwr	$11, 60(%1)\n"
-					"lwl	$11, 63(%1)\n"
-					"mtv	 $8, s030\n"
-					"mtv	 $9, s031\n"
-					"mtv	$10, s032\n"
-					"mtv	$11, s033\n"
-
-					"sync\n"
-					"sv.q 	c000,  0(%0), wb\n"
-					"sv.q 	c010, 16(%0), wb\n"
-					"sv.q 	c020, 32(%0), wb\n"
-					"sv.q 	c030, 48(%0), wb\n"
-					// Lots of variable updates... but get hidden in sv.q latency anyway
-					"addiu	%3, %3, -64\n"
-					"addiu	%2, %2, 64\n"
-					"addiu	%1, %1, 64\n"
-					"addiu	%0, %0, 64\n"
-					".set	pop\n"					// restore assembler option
-					:"+r"(udst8),"+r"(src8),"+r"(dst64a),"+r"(size)
-					:
-					:"$8","$9","$10","$11","memory"
-					);
-			}
-			if (size>16)
-			// Invalidate the last cache line where the max remaining 63 bytes are
-			asm(".set	push\n"					// save assembler option
-				".set	noreorder\n"			// suppress reordering
-				"cache	0x1B, 0(%0)\n"
-				"sync\n"
-				".set	pop\n"					// restore assembler option
-				::"r"(dst64a));
-			while (size>=16)
-			{
-				asm(".set	push\n"					// save assembler option
-					".set	noreorder\n"			// suppress reordering
-					"lwr	 $8,  0(%1)\n"			//
-					"lwl	 $8,  3(%1)\n"			// $8  = *(s + 0)
-					"lwr	 $9,  4(%1)\n"			//
-					"lwl	 $9,  7(%1)\n"			// $9  = *(s + 4)
-					"lwr	$10,  8(%1)\n"			//
-					"lwl	$10, 11(%1)\n"			// $10 = *(s + 8)
-					"lwr	$11, 12(%1)\n"			//
-					"lwl	$11, 15(%1)\n"			// $11 = *(s + 12)
-					"mtv	 $8, s000\n"
-					"mtv	 $9, s001\n"
-					"mtv	$10, s002\n"
-					"mtv	$11, s003\n"
-
-					"sv.q	c000, 0(%0), wb\n"
-					// Lots of variable updates... but get hidden in sv.q latency anyway
-					"addiu	%2, %2, -16\n"
-					"addiu	%1, %1, 16\n"
-					"addiu	%0, %0, 16\n"
-					".set	pop\n"					// restore assembler option
-					:"+r"(udst8),"+r"(src8),"+r"(size)
-					:
-					:"$8","$9","$10","$11","memory"
-					);
-			}
-			asm(".set	push\n"					// save assembler option
-				".set	noreorder\n"			// suppress reordering
-				"vflush\n"						// Flush VFPU writeback cache
-				".set	pop\n"					// restore assembler option
-				);
-			dst8 = (u8*)((u32)udst8 & ~0x40000000);
-			break;
+		*dst32++ = *src32++;
+		size -= 4;
 	}
 
-bytecopy:
-	// Copy the remains byte per byte...
-	while (size--)
+	dst8=(byte*)dst32;
+	src8=(byte*)src32;
+
+	if( ((unsigned int)src8&0xF)==0 )	//Both src and dst are 16byte aligned
 	{
-		*dst8++ = *src8++;
+		while (size>63)
+		{
+			asm(".set	push\n"					// save assembler option
+				".set	noreorder\n"			// suppress reordering
+				"lv.q c000, 0(%1)\n"
+				"lv.q c010, 16(%1)\n"
+				"lv.q c020, 32(%1)\n"
+				"lv.q c030, 48(%1)\n"
+				"sv.q c000, 0(%0)\n"
+				"sv.q c010, 16(%0)\n"
+				"sv.q c020, 32(%0)\n"
+				"sv.q c030, 48(%0)\n"
+				"addiu  %2, %2, -64\n"			//size -= 64;
+				"addiu	%1, %1, 64\n"			//dst8 += 64;
+				"addiu	%0, %0, 64\n"			//src8 += 64;
+				".set	pop\n"					// restore assembler option
+				:"+r"(dst8),"+r"(src8),"+r"(size)
+				:
+				:"memory"
+				);
+		}
+
+		while (size>15)
+		{
+			asm(".set	push\n"					// save assembler option
+				".set	noreorder\n"			// suppress reordering
+				"lv.q c000, 0(%1)\n"
+				"sv.q c000, 0(%0)\n"
+				"addiu  %2, %2, -16\n"			//size -= 16;
+				"addiu	%1, %1, 16\n"			//dst8 += 16;
+				"addiu	%0, %0, 16\n"			//src8 += 16;
+				".set	pop\n"					// restore assembler option
+				:"+r"(dst8),"+r"(src8),"+r"(size)
+				:
+				:"memory"
+				);
+		}
+	}
+	else 	//At least src is 4byte and dst is 16byte aligned
+    {
+		while (size>63)
+		{
+			asm(".set	push\n"					// save assembler option
+				".set	noreorder\n"			// suppress reordering
+				"ulv.q c000, 0(%1)\n"
+				"ulv.q c010, 16(%1)\n"
+				"ulv.q c020, 32(%1)\n"
+				"ulv.q c030, 48(%1)\n"
+				"sv.q c000, 0(%0)\n"
+				"sv.q c010, 16(%0)\n"
+				"sv.q c020, 32(%0)\n"
+				"sv.q c030, 48(%0)\n"
+				"addiu  %2, %2, -64\n"			//size -= 64;
+				"addiu	%1, %1, 64\n"			//dst8 += 64;
+				"addiu	%0, %0, 64\n"			//src8 += 64;
+				".set	pop\n"					// restore assembler option
+				:"+r"(dst8),"+r"(src8),"+r"(size)
+				:
+				:"memory"
+				);
+		}
+
+		while (size>15)
+		{
+			asm(".set	push\n"					// save assembler option
+				".set	noreorder\n"			// suppress reordering
+				"ulv.q c000, 0(%1)\n"
+				"sv.q c000, 0(%0)\n"
+				"addiu  %2, %2, -16\n"			//size -= 16;
+				"addiu	%1, %1, 16\n"			//dst8 += 16;
+				"addiu	%0, %0, 16\n"			//src8 += 16;
+				".set	pop\n"					// restore assembler option
+				:"+r"(dst8),"+r"(src8),"+r"(size)
+				:
+				:"memory"
+				);
+		}
+    }
+
+	// Most copies are completed with the VFPU, so fast out
+	if (size == 0)
+		return;
+	
+
+	dst32=(unsigned int*)dst8;
+	src32=(unsigned int*)src8;
+
+	//Copy remaning 32bit...
+	while( size>3 )
+	{
+		*dst32++ = *src32++;
+		size -= 4;
 	}
 
-	return (dst);
+	dst8=(byte*)dst32;
+	src8=(byte*)src32;
+
+	//Copy remaning bytes if any...
+	while( size>0 )
+    {
+        *dst8++ = *src8++;
+        size--;
+    }
+
+	return;
 }
-
 /*
 ===================
 Q_malloc

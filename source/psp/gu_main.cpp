@@ -1891,7 +1891,7 @@ void R_SetupGL (void)
 	// the smaller the number, the more polys get clipped and by extension more polys also rejected
 	// at a sweet spot we want to maximize rejected polys but minimize (clipped - rejected) amount at the same time
 	// it's a balancing act and every change has to be benchmarked. between 2.5, 2.2 and 2.0, 2.2 was the fastest.
-	clipping::begin_frame(fovy, fmin(175.f, fovy * 2.2f), screenaspect);
+	clipping::begin_frame(fovy, fmin(165.f, fovy * 2.2f), screenaspect);
 
 	sceGumMatrixMode(GU_PROJECTION);
 	sceGumLoadIdentity();
